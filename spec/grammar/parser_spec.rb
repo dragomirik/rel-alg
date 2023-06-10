@@ -45,6 +45,14 @@ RSpec.describe ::Grammar::Parser do
     it 'should parse projection correctly' do
       expect(subject.parse('R[id]').map(&:to_s)).to eq(%w[R PROJECTION(id)])
     end
+
+    it 'should parse projection with multiple attributes correctly' do
+      expect(subject.parse('R[id,name]').map(&:to_s)).to eq(%w[R PROJECTION(id,name)])
+    end
+
+    it 'should parse projection with multiple attributes with whitespaces correctly' do
+      expect(subject.parse('R[id,name, something_else]').map(&:to_s)).to eq(%w[R PROJECTION(id,name,something_else)])
+    end
   end
 
   context 'parsing limit' do

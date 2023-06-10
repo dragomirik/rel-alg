@@ -20,7 +20,7 @@ module Grammar
         case char
         when ' '
           appent_to_current_string(char) if @inside_quotes
-        when /[\w='\/]/
+        when /[\w='\/,]/
           appent_to_current_string(char)
           @inside_quotes = !@inside_quotes if char == "'"
         when '('

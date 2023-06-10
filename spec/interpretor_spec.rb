@@ -1,34 +1,51 @@
+require 'date'
+
 require 'interpretor.rb'
 
 RSpec.describe ::Interpretor do
+  let :users do
+    ::Relation.new(id: :numeric, name: :string)
+              .bulk_insert([
+      [1, 'John'],
+      [2, 'Jane'],
+      [3, 'Peter']
+    ])
+  end
+
+  let :admins do
+    ::Relation.new(id: :numeric, name: :string)
+              .bulk_insert([
+      [1, 'John'],
+      [2, 'Anne']
+    ])
+  end
+
+  let :user_roles do
+    ::Relation.new(role: :string)
+              .bulk_insert([
+      ['user'],
+      ['manager']
+    ])
+  end
+
+  let :projects do
+    ::Relation.new(id: :numeric, name: :string, start_date: :date)
+              .bulk_insert([
+      [1, 'Netvisor', ::Date.new(2023, 1, 1)],
+      [2, 'Severa', ::Date.new(2023, 3, 22)]
+    ])
+  end
+
+  let :data do
+    {
+      Users:     users,
+      Admins:    admins,
+      UserRoles: user_roles,
+      Projects:  projects
+    }
+  end
+
   context 'set operations' do
-    let :users do
-      ::Relation.new(id: :numeric, name: :string)
-                .bulk_insert([
-        [1, 'John'],
-        [2, 'Jane'],
-        [3, 'Peter']
-      ])
-    end
-
-    let :admins do
-      ::Relation.new(id: :numeric, name: :string)
-                .bulk_insert([
-        [1, 'John'],
-        [2, 'Anne']
-      ])
-    end
-
-    let :user_roles do
-      ::Relation.new(role: :string)
-                .bulk_insert([
-        ['user'],
-        ['manager']
-      ])
-    end
-
-    let(:data) { { Users: users, Admins: admins, UserRoles: user_roles } }
-
     it 'should perform intersection correctly' do
       lines = ['Users & Admins -> Res']
       res_data = subject.run(lines, data)
@@ -122,6 +139,35 @@ RSpec.describe ::Interpretor do
         expect { subject.run(['Users | UserRoles -> Res'], data) }.to raise_error(
           ArgumentError, /Cannot apply UNION: relations' attribute types don't match/
         )
+      end
+    end
+  end
+
+  context 'relational algebra operations' do
+    context 'projection' do
+      it 'should not perform projection if there is no such attribute' do
+        expect { subject.run(['Users[year_of_birth] -> Res'], data) }.to raise_error(
+          ArgumentError, /Cannot apply PROJECTION\(year_of_birth\): relation's attributes do not include year_of_birth/
+        )
+      end
+
+      it 'should perform projection with one attribute correctly' do
+        lines = ['Users[name] -> Res']
+        res_data = subject.run(lines, data)
+        expect(res_data[:Res].to_a).to eq([
+          { name: 'John' },
+          { name: 'Jane' },
+          { name: 'Peter' }
+        ])
+      end
+
+      it 'should perform projection with multiple attributes correctly' do
+        lines = ['Projects[start_date, name] -> Res']
+        res_data = subject.run(lines, data)
+        expect(res_data[:Res].to_a).to eq([
+          { start_date: ::Date.new(2023, 1, 1), name: 'Netvisor' },
+          { start_date: ::Date.new(2023, 3, 22), name: 'Severa' }
+        ])
       end
     end
   end
