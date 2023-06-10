@@ -1,6 +1,3 @@
-require 'rspec'
-require 'pry'
-
 require 'grammar/parser.rb'
 
 RSpec.describe ::Grammar::Parser do
