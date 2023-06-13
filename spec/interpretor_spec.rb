@@ -76,12 +76,12 @@ RSpec.describe ::Interpretor do
       lines = ['Users * Admins -> Res']
       res_data = subject.run(lines, data)
       expect(res_data[:Res].to_a).to eq([
-        { 'r1.id': 1, 'r1.name': 'John', 'r2.id': 1, 'r2.name': 'John' },
-        { 'r1.id': 1, 'r1.name': 'John', 'r2.id': 2, 'r2.name': 'Anne' },
-        { 'r1.id': 2, 'r1.name': 'Jane', 'r2.id': 1, 'r2.name': 'John' },
-        { 'r1.id': 2, 'r1.name': 'Jane', 'r2.id': 2, 'r2.name': 'Anne' },
-        { 'r1.id': 3, 'r1.name': 'Peter', 'r2.id': 1, 'r2.name': 'John' },
-        { 'r1.id': 3, 'r1.name': 'Peter', 'r2.id': 2, 'r2.name': 'Anne' }
+        { 'Users.id': 1, 'Users.name': 'John', 'Admins.id': 1, 'Admins.name': 'John' },
+        { 'Users.id': 1, 'Users.name': 'John', 'Admins.id': 2, 'Admins.name': 'Anne' },
+        { 'Users.id': 2, 'Users.name': 'Jane', 'Admins.id': 1, 'Admins.name': 'John' },
+        { 'Users.id': 2, 'Users.name': 'Jane', 'Admins.id': 2, 'Admins.name': 'Anne' },
+        { 'Users.id': 3, 'Users.name': 'Peter', 'Admins.id': 1, 'Admins.name': 'John' },
+        { 'Users.id': 3, 'Users.name': 'Peter', 'Admins.id': 2, 'Admins.name': 'Anne' }
       ])
     end
 
@@ -147,7 +147,7 @@ RSpec.describe ::Interpretor do
     context 'projection' do
       it 'should not perform projection if there is no such attribute' do
         expect { subject.run(['Users[year_of_birth] -> Res'], data) }.to raise_error(
-          ArgumentError, /Cannot apply PROJECTION\(year_of_birth\): relation's attributes do not include year_of_birth/
+          ArgumentError, "Cannot apply PROJECTION(year_of_birth): relation's attributes do not include year_of_birth"
         )
       end
 
@@ -168,6 +168,63 @@ RSpec.describe ::Interpretor do
           { start_date: ::Date.new(2023, 1, 1), name: 'Netvisor' },
           { start_date: ::Date.new(2023, 3, 22), name: 'Severa' }
         ])
+      end
+    end
+
+    context 'limit' do
+      it 'should perform limit correctly' do
+        lines = ['(Users * Admins)[Users.name=Admins.name] -> Res']
+        res_data = subject.run(lines, data)
+        expect(res_data[:Res].to_a).to eq([
+          { 'Users.id': 1, 'Users.name': 'John', 'Admins.id': 1, 'Admins.name': 'John' }
+        ])
+      end
+
+      context 'simplified limit' do
+        it 'should peform simplified limit with GT operator correctly' do
+          lines = ['Users[id>1] -> Res']
+          res_data = subject.run(lines, data)
+          expect(res_data[:Res].to_a).to eq([
+            { id: 2, name: 'Jane' },
+            { id: 3, name: 'Peter' }
+          ])
+        end
+
+        it 'should perform simplified limit with EQ operator correctly' do
+          lines = ["Users[name='John'] -> Res"]
+          res_data = subject.run(lines, data)
+          expect(res_data[:Res].to_a).to eq([
+            { id: 1, name: 'John' }
+          ])
+        end
+      end
+
+      context 'invalid expressions' do
+        it 'should not perform limit if there is no such attribute' do
+          expect { subject.run(['Users[year_of_birth=1996] -> Res'], data) }.to raise_error(
+            ArgumentError, "Cannot apply LIMIT(year_of_birth=1996): relation's attributes do not include year_of_birth"
+          )
+        end
+
+        it 'should not perform limit if the second attribute does not exist' do
+          expect { subject.run(['Users[id=second_id] -> Res'], data) }.to raise_error(
+            ArgumentError, "Cannot apply LIMIT(id=second_id): relation's attributes do not include second_id"
+          )
+        end
+
+        context 'simplified limit with mismatching value type' do
+          it 'should raise an exception if the attribute is a string and the value is a number' do
+            expect { subject.run(['Users[name=1] -> Res'], data) }.to raise_error(
+              ArgumentError, "Cannot apply LIMIT(name=1): 1 is not a string"
+            )
+          end
+
+          it 'should raise an exception if the attribute is a number and the value is a string' do
+            expect { subject.run(["Users[id='John'] -> Res"], data) }.to raise_error(
+              ArgumentError, "Cannot apply LIMIT(id='John'): 'John' cannot be parsed into a number"
+            )
+          end
+        end
       end
     end
   end

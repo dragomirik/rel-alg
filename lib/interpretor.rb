@@ -2,10 +2,16 @@ require 'grammar/parser.rb'
 
 class Interpretor
   def run(lines, data)
+    data.each do |name, relation|
+      # Assign names to attributes in case product is used
+      relation.name = name
+    end
     lines.each do |line|
       expression, relation_name = line.split(/ *-> */)
       rpn = ::Grammar::Parser.parse(expression)
-      data[relation_name.strip.to_sym] = evaluate(rpn, data)
+      resulting_relation = evaluate(rpn, data)
+      resulting_relation.name = relation_name.strip.to_sym
+      data[resulting_relation.name] = resulting_relation
     end
     data
   end

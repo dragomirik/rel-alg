@@ -5,8 +5,8 @@ module Grammar
     class Product < ::Grammar::Operator
       def apply(r1, r2)
         new_rel_attributes = {
-          **r1.attributes_hash.transform_keys { |k| r2.attributes_hash.key?(k) ? "r1.#{k}".to_sym : k },
-          **r2.attributes_hash.transform_keys { |k| r1.attributes_hash.key?(k) ? "r2.#{k}".to_sym : k }
+          **r1.attributes_hash.transform_keys { |k| r2.attribute_names.include?(k) ? "#{r1.name}.#{k}".to_sym : k },
+          **r2.attributes_hash.transform_keys { |k| r1.attribute_names.include?(k) ? "#{r2.name}.#{k}".to_sym : k }
         }
         new_rel = ::Relation.new(**new_rel_attributes)
         r1.rows.each do |r1_row|

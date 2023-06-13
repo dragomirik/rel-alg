@@ -2,6 +2,7 @@ require 'attribute.rb'
 
 class Relation
   attr_reader :rows, :attributes
+  attr_accessor :name
 
   def initialize(**attributes)
     @attributes = attributes.map { |name, type| ::Attribute.new(name, type) }
@@ -33,8 +34,12 @@ class Relation
     ].join("\n")
   end
 
+  def attribute_names
+    @attribute_names ||= @attributes.map(&:name)
+  end
+
   def attributes_hash
-    @attributes.map { |a| [a.name, a.type] }.to_h
+    @attributes_hash ||= @attributes.map { |a| [a.name, a.type] }.to_h
   end
 
   private
