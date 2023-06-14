@@ -4,8 +4,7 @@ require 'interpretor.rb'
 
 RSpec.describe ::Interpretor do
   let :users do
-    ::Relation.new(id: :numeric, name: :string)
-              .bulk_insert([
+    ::Relation.new(id: :numeric, name: :string).bulk_insert([
       [1, 'John'],
       [2, 'Jane'],
       [3, 'Peter']
@@ -13,24 +12,30 @@ RSpec.describe ::Interpretor do
   end
 
   let :admins do
-    ::Relation.new(id: :numeric, name: :string)
-              .bulk_insert([
+    ::Relation.new(id: :numeric, name: :string).bulk_insert([
       [1, 'John'],
       [2, 'Anne']
     ])
   end
 
   let :user_roles do
-    ::Relation.new(role: :string)
-              .bulk_insert([
+    ::Relation.new(role: :string).bulk_insert([
       ['user'],
       ['manager']
     ])
   end
 
+  let :users_user_roles do
+    ::Relation.new(user_id: :numeric, role: :string).bulk_insert([
+      [1, 'manager'],
+      [2, 'user'],
+      [2, 'manager'],
+      [3, 'user']
+    ])
+  end
+
   let :projects do
-    ::Relation.new(id: :numeric, name: :string, start_date: :date)
-              .bulk_insert([
+    ::Relation.new(id: :numeric, name: :string, start_date: :date).bulk_insert([
       [1, 'Netvisor', ::Date.new(2023, 1, 1)],
       [2, 'Severa', ::Date.new(2023, 3, 22)]
     ])
@@ -38,10 +43,11 @@ RSpec.describe ::Interpretor do
 
   let :data do
     {
-      Users:     users,
-      Admins:    admins,
-      UserRoles: user_roles,
-      Projects:  projects
+      Users:          users,
+      Admins:         admins,
+      UserRoles:      user_roles,
+      UsersUserRoles: users_user_roles,
+      Projects:       projects
     }
   end
 
@@ -269,6 +275,30 @@ RSpec.describe ::Interpretor do
         it 'should raise an exception if there is no such attribute in the second relation' do
           expect { subject.run(['Users[id!=meow]Admins -> Res'], data) }.to raise_error(
             ArgumentError, "Cannot apply JOIN(id!=meow): second relation's attributes do not include meow"
+          )
+        end
+      end
+    end
+
+    context 'division' do
+      it 'should perform division correctly' do
+        lines = ['UsersUserRoles[role/role]UserRoles -> Res']
+        res_data = subject.run(lines, data)
+        expect(res_data[:Res].to_a).to eq([
+          { user_id: 2 }
+        ])
+      end
+
+      context 'invalid expressions' do
+        it 'should raise an exception if there is no such attribute in the first relation' do
+          expect { subject.run(['UsersUserRoles[meow/role]UserRoles -> Res'], data) }.to raise_error(
+            ArgumentError, "Cannot apply DIVISION(meow/role): first relation's attributes do not include meow"
+          )
+        end
+
+        it 'should raise an exception if there is no such attribute in the second relation' do
+          expect { subject.run(['UsersUserRoles[role/meow]UserRoles -> Res'], data) }.to raise_error(
+            ArgumentError, "Cannot apply DIVISION(role/meow): second relation's attributes do not include meow"
           )
         end
       end
