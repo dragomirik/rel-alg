@@ -1,5 +1,5 @@
-require 'grammar/parser.rb'
-require 'data_container'
+require_relative 'grammar/parser.rb'
+require_relative 'data_container'
 
 class Interpretor
   def run(lines, data)

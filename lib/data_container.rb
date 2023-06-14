@@ -14,4 +14,8 @@ class DataContainer
     relation.name = name
     @data[name.to_sym] = relation
   end
+
+  def to_h
+    @data
+  end
 end

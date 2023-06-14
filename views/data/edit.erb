@@ -1,0 +1,38 @@
+<h2><a href="/">Relational Algebra Interpretor</a> / <a href="/data">Input Data</a> / Edit <%= name %></h2>
+
+<div class="relation-form">
+  <div>
+    <form action="/data/<%= name %>/update" method="post" autocomplete="off">
+      <label for="name">Name:</label><br/>
+      <input type="text" name="name" id="name" value="<%= name %>"><br/><br/>
+      <label for="schema">Attribute names & types:</label><br/>
+      <textarea cols="50" rows="10" name="schema" id="schema"><%= schema %></textarea><br/><br/>
+      <label for="rows">Data:</label><br/>
+      <textarea cols="50" rows="15" name="rows" id="rows"><%= rows %></textarea><br/><br/>
+      <input type="submit" value="Update">
+    </form>
+  </div>
+  <div class="notes">
+    <p>
+      Edit attributes & data as CSV (one line per attribute, one line per data row).
+    </p>
+    <p>
+      Attribute format is <code>attribute_name,attribute_type</code>, where <code>attribute_type</code> can
+      be one of the following: <code>numeric</code>, <code>string</code>, <code>date</code>.
+    </p>
+    <p>
+      <b>Example.</b> For a relation <code>Users</code> with three attributes (<code>id</code>, <code>email</code>, and <code>name</code>)
+      one would enter the following into the <i>Attribute names & types</i> textarea:
+      <pre>
+id,numeric
+email,string
+name,string
+      </pre>
+      And the following into the <i>Data</i> textarea:
+      <pre>
+1,john@example.com,John Smith
+2,jane@example.com,Jane Doe
+      </pre>
+    </p>
+  </div>
+</div>

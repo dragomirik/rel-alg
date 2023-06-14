@@ -1,0 +1,16 @@
+<h2><a href="/">Relational Algebra Interpretor</a> / <a href="/data">Input Data</a> / Drop <%= name %></h2>
+
+<p>
+  Do you really want to permanently delete relation <code><%= name %></code>? This action cannot be undone.
+</p>
+<% unless data.rows.size == 0 %>
+  <p>
+    Current data in <code><%= name %></code> relation:
+    <pre>
+<%= data %>
+    </pre>
+  </p>
+<% end %>
+<form action="/data/<%= name %>/destroy" method="post">
+  <input type="submit" value="Permanently delete">
+</form>

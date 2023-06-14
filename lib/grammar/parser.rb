@@ -1,13 +1,13 @@
-require 'grammar/errors.rb'
-require 'grammar/operator.rb'
-require 'grammar/operators/difference.rb'
-require 'grammar/operators/division.rb'
-require 'grammar/operators/intersection.rb'
-require 'grammar/operators/join.rb'
-require 'grammar/operators/limit.rb'
-require 'grammar/operators/product.rb'
-require 'grammar/operators/projection.rb'
-require 'grammar/operators/union.rb'
+require_relative 'errors.rb'
+require_relative 'operator.rb'
+require_relative 'operators/difference.rb'
+require_relative 'operators/division.rb'
+require_relative 'operators/intersection.rb'
+require_relative 'operators/join.rb'
+require_relative 'operators/limit.rb'
+require_relative 'operators/product.rb'
+require_relative 'operators/projection.rb'
+require_relative 'operators/union.rb'
 
 module Grammar
   class Parser

@@ -1,4 +1,4 @@
-require 'attribute.rb'
+require_relative 'attribute.rb'
 
 class Relation
   attr_reader :rows, :attributes

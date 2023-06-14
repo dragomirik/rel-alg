@@ -1,4 +1,4 @@
-require 'grammar/operator.rb'
+require_relative '../operator.rb'
 
 module Grammar
   module Operators
