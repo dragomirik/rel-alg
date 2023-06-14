@@ -227,5 +227,51 @@ RSpec.describe ::Interpretor do
         end
       end
     end
+
+    context 'join' do
+      it 'should perform join with EQ operator correctly' do
+        lines = ['Users[name=name]Admins -> Res']
+        res_data = subject.run(lines, data)
+        expect(res_data[:Res].to_a).to eq([
+          { 'Users.id': 1, 'Users.name': 'John', 'Admins.id': 1, 'Admins.name': 'John' }
+        ])
+      end
+
+      it 'should perform join with GTE operator correctly' do
+        lines = ['Admins[id>=id]Users -> Res']
+        res_data = subject.run(lines, data)
+        expect(res_data[:Res].to_a).to eq([
+          { 'Admins.id': 1, 'Admins.name': 'John', 'Users.id': 1, 'Users.name': 'John' },
+          { 'Admins.id': 2, 'Admins.name': 'Anne', 'Users.id': 1, 'Users.name': 'John' },
+          { 'Admins.id': 2, 'Admins.name': 'Anne', 'Users.id': 2, 'Users.name': 'Jane' }
+        ])
+      end
+
+      it 'should perform join with NEQ operator correctly' do
+        lines = ['Users[name<>name]Admins -> Res']
+        res_data = subject.run(lines, data)
+        expect(res_data[:Res].to_a).to eq([
+          { 'Users.id': 1, 'Users.name': 'John', 'Admins.id': 2, 'Admins.name': 'Anne' },
+          { 'Users.id': 2, 'Users.name': 'Jane', 'Admins.id': 1, 'Admins.name': 'John' },
+          { 'Users.id': 2, 'Users.name': 'Jane', 'Admins.id': 2, 'Admins.name': 'Anne' },
+          { 'Users.id': 3, 'Users.name': 'Peter', 'Admins.id': 1, 'Admins.name': 'John' },
+          { 'Users.id': 3, 'Users.name': 'Peter', 'Admins.id': 2, 'Admins.name': 'Anne' }
+        ])
+      end
+
+      context 'invalid expressions' do
+        it 'should raise an exception if there is no such attribute in the first relation' do
+          expect { subject.run(['Users[meow=id]Admins -> Res'], data) }.to raise_error(
+            ArgumentError, "Cannot apply JOIN(meow=id): first relation's attributes do not include meow"
+          )
+        end
+
+        it 'should raise an exception if there is no such attribute in the second relation' do
+          expect { subject.run(['Users[id!=meow]Admins -> Res'], data) }.to raise_error(
+            ArgumentError, "Cannot apply JOIN(id!=meow): second relation's attributes do not include meow"
+          )
+        end
+      end
+    end
   end
 end
