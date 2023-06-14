@@ -1,17 +1,13 @@
 require 'grammar/parser.rb'
+require 'data_container'
 
 class Interpretor
   def run(lines, data)
-    data.each do |name, relation|
-      # Assign names to attributes in case product is used
-      relation.name = name
-    end
+    data = ::DataContainer.new(data)
     lines.each do |line|
       expression, relation_name = line.split(/ *-> */)
       rpn = ::Grammar::Parser.parse(expression)
-      resulting_relation = evaluate(rpn, data)
-      resulting_relation.name = relation_name.strip.to_sym
-      data[resulting_relation.name] = resulting_relation
+      data[relation_name.strip.to_sym] = evaluate(rpn, data)
     end
     data
   end
@@ -21,7 +17,7 @@ class Interpretor
   def evaluate(reverse_polish_notation, data)
     execution_stack = []
     reverse_polish_notation.map { |term|
-      term.is_a?(::Grammar::Operator) ? term : data[term.to_sym]
+      term.is_a?(::Grammar::Operator) ? term : data[term]
     }.each do |term|
       if term.is_a?(::Grammar::Operator)
         execution_stack.push(term.apply(*execution_stack.pop(term.arity)))
