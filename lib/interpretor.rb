@@ -8,7 +8,8 @@ class Interpretor
     sanitize_program_lines(lines).each.with_index(1) do |line, i|
       expression, relation_name = line.split(/ *-> */)
       rpn = ::Grammar::Parser.parse(expression)
-      data[relation_name.strip.to_sym] = evaluate(rpn, data)
+      resulting_relation = evaluate(rpn, data)
+      data[relation_name.strip.to_sym] = resulting_relation if relation_name
     rescue ::Errors::OperatorError => e
       raise ::Errors::InterpretationError.new(e, line, i, data)
     end

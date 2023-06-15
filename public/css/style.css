@@ -23,3 +23,6 @@ a:hover {
 .relation-form .notes {
   padding-left: 20px;
 }
+form .errors {
+  color: red;
+}

@@ -34,6 +34,51 @@ def load_data
   ::DataContainer.new(data_hash)
 end
 
+def parse_schema_hash_from_csv(schema_csv)
+  ::CSV.parse(schema_csv.strip).map { |(k, v)| [k.to_sym, v.to_sym] }.to_h rescue nil
+end
+
+def validate_relation_params(params, old_relation_name = nil)
+  errors = {}
+  unless params['name'].to_s.size > 0
+    errors[:name] = 'Relation name is required'
+  end
+  schema = ::YAML.load(::File.read(SCHEMA_PATH))
+  if (old_relation_name.nil? || old_relation_name != params['name']) && schema[params['name'].to_sym]
+    errors[:name] = 'Relation with such name already exists'
+  end
+  relation_schema = parse_schema_hash_from_csv(params['schema'])
+  unless relation_schema
+    errors[:schema] = 'Failed to parse relation attributes. Please make sure that the CSV is valid'
+    return errors
+  end
+  if relation_schema.empty?
+    errors[:schema] = 'At least one relation attribute is required'
+  end
+  unless relation_schema.values.all? { |type| ::Attribute::TYPES.include?(type.to_sym) }
+    errors[:schema] = 'Unknown attribute type(s) provided'
+  end
+  ::CSV.parse(params['rows'].strip).each.with_index(1) do |row, row_i|
+    if row.size != relation_schema.keys.size
+      (errors[:rows] ||= []) << "Error in data row #{row_i}: #{row.size} columns instead of expected #{relation_schema.keys.size}"
+    end
+    relation_schema.each.with_index do |(name, type), column_i|
+      case type
+      when :numeric
+        unless row[column_i]&.match?(/\d+(\.\d+)?/)
+          (errors[:rows] ||= []) << "Error in data row #{row_i}: #{row[column_i]} (#{name}) cannot be parsed into a number"
+        end
+      when :date
+        date = ::Date.parse(row[column_i]) rescue nil
+        unless date
+          (errors[:rows] ||= []) << "Error in data row #{row_i}: #{row[column_i]} (#{name}) cannot be parsed into a date"
+        end
+      end
+    end
+  end
+  errors
+end
+
 get '/' do
   output = nil
   output = if params['program'].to_s.size > 0
@@ -56,44 +101,62 @@ get '/data' do
 end
 
 get '/data/new' do
-  erb :'data/new'
+  erb :'data/new', locals: { name: nil, schema: nil, rows: nil, errors: {} }
 end
 
 post '/data/create' do
-  schema = ::YAML.load(::File.read(SCHEMA_PATH))
-  relation_schema = ::CSV.parse(params['schema'].strip).to_h.transform_keys(&:to_sym).transform_values(&:to_sym)
-  schema[params['name'].to_sym] = relation_schema
-  ::File.open(SCHEMA_PATH, 'w') { |f| f.write(schema.to_yaml) }
-  ::File.open(RELATION_DATA_PATH.call(params['name']), 'w') { |f| f.write(params['rows'].strip) }
-  redirect to '/data'
+  if (errors = validate_relation_params(params)).empty?
+    schema = ::YAML.load(::File.read(SCHEMA_PATH))
+    schema[params['name'].to_sym] = parse_schema_hash_from_csv(params['schema'])
+    ::File.open(SCHEMA_PATH, 'w') { |f| f.write(schema.to_yaml) }
+    ::File.open(RELATION_DATA_PATH.call(params['name']), 'w') { |f| f.write(params['rows'].strip) }
+    redirect to '/data'
+  else
+    erb :'data/new', locals: {
+      name: params['name'],
+      schema: params['schema'],
+      rows: params['rows'],
+      errors: errors
+    }
+  end
 end
 
 get '/data/:relation/edit' do
   erb :'data/edit', locals: {
+    original_name: params['relation'],
     name: params['relation'],
     schema: load_data[params['relation'].to_sym].attributes_hash.to_a.map { |attr| attr.to_csv }.join,
-    rows: ::File.read(RELATION_DATA_PATH.call(params['relation']))
+    rows: ::File.read(RELATION_DATA_PATH.call(params['relation'])),
+    errors: {}
   }
 end
 
 post '/data/:relation/update' do
-  name = params['relation']
-  schema = ::YAML.load(::File.read(SCHEMA_PATH))
+  original_name = params['relation']
+  if (errors = validate_relation_params(params, original_name)).empty?
+    schema = ::YAML.load(::File.read(SCHEMA_PATH))
 
-  if (new_name = params['name'].strip) && new_name != name
-    ::FileUtils.mv(RELATION_DATA_PATH.call(name), RELATION_DATA_PATH.call(new_name))
-    schema[new_name.to_sym] = schema.delete(name.to_sym)
-    name = new_name
+    if (new_name = params['name'].strip) && new_name != original_name
+      ::FileUtils.mv(RELATION_DATA_PATH.call(original_name), RELATION_DATA_PATH.call(new_name))
+      schema[new_name.to_sym] = schema.delete(original_name.to_sym)
+    end
+
+    new_schema = ::CSV.parse(params['schema'].strip).to_h.transform_keys(&:to_sym).transform_values(&:to_sym)
+    schema[params['name'].strip.to_sym] = new_schema
+    ::File.open(SCHEMA_PATH, 'w') { |f| f.write(schema.to_yaml) }
+
+    ::File.open(RELATION_DATA_PATH.call(params['name'].strip), 'w') { |f| f.write(params['rows'].strip) }
+
+    redirect to '/data'
+  else
+    erb :'data/edit', locals: {
+      original_name: original_name,
+      name: params['name'],
+      schema: params['schema'],
+      rows: params['rows'],
+      errors: errors
+    }
   end
-
-  new_schema = ::CSV.parse(params['schema'].strip).to_h.transform_keys(&:to_sym).transform_values(&:to_sym)
-  schema[params['relation'].to_sym] = new_schema
-  ::File.open(SCHEMA_PATH, 'w') { |f| f.write(schema.to_yaml) }
-
-  new_data_rows = params['rows'].strip
-  ::File.open(RELATION_DATA_PATH.call(name), 'w') { |f| f.write(new_data_rows) }
-
-  redirect to '/data'
 end
 
 get '/data/:relation/delete' do
