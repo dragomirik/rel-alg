@@ -1,23 +1,40 @@
 require_relative 'grammar/parser.rb'
 require_relative 'data_container'
+require_relative 'errors'
 
 class Interpretor
   def run(lines, data)
     data = ::DataContainer.new(data)
-    lines.each do |line|
+    sanitize_program_lines(lines).each.with_index(1) do |line, i|
       expression, relation_name = line.split(/ *-> */)
       rpn = ::Grammar::Parser.parse(expression)
       data[relation_name.strip.to_sym] = evaluate(rpn, data)
+    rescue ::Errors::OperatorError => e
+      raise ::Errors::InterpretationError.new(e, line, i, data)
     end
     data
   end
 
   private
 
+  def sanitize_program_lines(lines)
+    lines = lines.map do |line|
+      SANITIZED_CHARACTERS.reduce(line.sub(%r{//.*$}, '')) { |l, (c_in, c_out)| l.gsub(c_in, c_out) }
+    end
+  end
+
   def evaluate(reverse_polish_notation, data)
     execution_stack = []
     reverse_polish_notation.map { |term|
-      term.is_a?(::Grammar::Operator) ? term : data[term]
+      if term.is_a?(::Grammar::Operator)
+        term
+      else
+        relation = data[term]
+        if relation.nil?
+          raise ::Errors::UnknownRelationError.new(term, data)
+        end
+        relation
+      end
     }.each do |term|
       if term.is_a?(::Grammar::Operator)
         execution_stack.push(term.apply(*execution_stack.pop(term.arity)))
@@ -31,4 +48,14 @@ class Interpretor
     end
     execution_stack[0]
   end
+
+  SANITIZED_CHARACTERS = {
+    '÷' => '/',
+    '∪' => '|',
+    '∩' => '&',
+    '×' => '*',
+    '⟶' => '->',
+    '‘' => "'",
+    '’' => "'"
+  }.freeze
 end

@@ -10,7 +10,7 @@ RSpec.describe ::Relation do
       expect(subject.to_s).to eq(
         "id | name | year_of_birth\n"\
         "-------------------------\n"\
-        "0 record(s)"
+        "(0 record(s))"
       )
     end
 
@@ -20,7 +20,7 @@ RSpec.describe ::Relation do
         "id | name       | year_of_birth\n"\
         "-------------------------------\n"\
         "1  | John Smith | 1996         \n"\
-        "1 record(s)"
+        "(1 record(s))"
       )
     end
 
@@ -36,7 +36,20 @@ RSpec.describe ::Relation do
         "1    | John Smith       | 1996         \n"\
         "1002 | Jane Doe         | 1987         \n"\
         "3    | Sir Isaac Newton | 1642         \n"\
-        "3 record(s)"
+        "(3 record(s))"
+      )
+    end
+
+    it 'should display a relation with a name correctly' do
+      subject.insert(1, 'John Smith', 1996)
+      subject.name = :Users
+      expect(subject.to_s).to eq(
+        "Users:\n"\
+        "\n"\
+        "id | name       | year_of_birth\n"\
+        "-------------------------------\n"\
+        "1  | John Smith | 1996         \n"\
+        "(1 record(s))"
       )
     end
   end

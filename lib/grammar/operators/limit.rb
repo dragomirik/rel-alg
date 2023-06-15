@@ -34,12 +34,10 @@ module Grammar
 
       def validate_attribute_names(r)
         unless r.attribute_names.include?(@attribute.to_sym)
-          raise ArgumentError,
-                "Cannot apply #{to_s}: relation's attributes do not include #{@attribute}"
+          raise ::Errors::OperatorError.new(to_s, "relation's attributes do not include #{@attribute}")
         end
         if is_second_operand_an_attribute_name? && !r.attribute_names.include?(@second_operand.to_sym)
-          raise ArgumentError,
-                "Cannot apply #{to_s}: relation's attributes do not include #{@second_operand}"
+          raise ::Errors::OperatorError.new(to_s, "relation's attributes do not include #{@second_operand}")
         end
       end
 
@@ -55,19 +53,16 @@ module Grammar
         case r.attributes_hash[@attribute.to_sym]
         when :numeric
           unless @second_operand.match?(/^\d+(\.\d+)?$/)
-            raise ArgumentError,
-                  "Cannot apply #{to_s}: #{@second_operand} cannot be parsed into a number"
+            raise ::Errors::OperatorError.new(to_s, "#{@second_operand} cannot be parsed into a number")
           end
         when :string
           unless @second_operand.match?(/^'.*'$/)
-            raise ArgumentError,
-                  "Cannot apply #{to_s}: #{@second_operand} is not a string"
+            raise ::Errors::OperatorError.new(to_s, "#{@second_operand} is not a string")
           end
         when :date
           parsed_date = ::Date.parse(@second_operand) rescue nil
           if parsed_date.nil?
-            raise ArgumentError,
-                  "Cannot apply #{to_s}: #{@second_operand} cannot be parsed into a date"
+            raise ::Errors::OperatorError.new(to_s, "#{@second_operand} cannot be parsed into a date")
           end
           @second_operand = "::Date.parse(#{@second_operand})"
         end

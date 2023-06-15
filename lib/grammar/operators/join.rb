@@ -5,21 +5,22 @@ module Grammar
     class Join < ::Grammar::Operator
       def initialize(params)
         @params = params
-        @r1_attr, @operator, @r2_attr = params.split(/([=!<>]+)/)
+        @r1_attr, @operator, @r2_attr = params.split(/([=!<>๐]+)/)
         super()
       end
 
       def apply(r1, r2)
         validate_attribute_names(r1, r2)
-        new_rel_attributes = {
-          **r1.attributes_hash.transform_keys { |k| r2.attribute_names.include?(k) ? "#{r1.name}.#{k}".to_sym : k },
-          **r2.attributes_hash.transform_keys { |k| r1.attribute_names.include?(k) ? "#{r2.name}.#{k}".to_sym : k }
-        }
-        new_rel = ::Relation.new(**new_rel_attributes)
+        new_rel = resulting_relation(r1, r2)
         r1.rows.each do |r1_row|
-          r2.rows.each do |r2_row|
-            if eval("r1_row.public_send(@r1_attr) #{rubified_operator} r2_row.public_send(@r2_attr)")
-              new_rel.insert(*r1_row.to_a, *r2_row.to_a)
+          relation2 = if should_have_one_join_attribute?
+                        Projection.new(r2.attribute_names.select { |n| n != @r2_attr.to_sym }.join(',')).apply(r2)
+                      else
+                        r2
+                      end
+          r2.rows.zip(relation2.rows).each do |original_r2_row, r2_row_to_join|
+            if eval("r1_row.public_send(@r1_attr) #{rubified_operator} original_r2_row.public_send(@r2_attr)")
+              new_rel.insert(*r1_row.to_a, *r2_row_to_join.to_a)
             end
           end
         end
@@ -34,19 +35,44 @@ module Grammar
 
       def validate_attribute_names(r1, r2)
         unless r1.attribute_names.include?(@r1_attr.to_sym)
-          raise ArgumentError,
-                "Cannot apply #{to_s}: first relation's attributes do not include #{@r1_attr}"
+          raise ::Errors::OperatorError.new(to_s, "first relation's attributes do not include #{@r1_attr}")
         end
         unless r2.attribute_names.include?(@r2_attr.to_sym)
-          raise ArgumentError,
-                "Cannot apply #{to_s}: second relation's attributes do not include #{@r2_attr}"
+          raise ::Errors::OperatorError.new(to_s, "second relation's attributes do not include #{@r2_attr}")
         end
+      end
+
+      def resulting_relation(r1, r2)
+        new_rel_attributes = {
+          **r1.attributes_hash.transform_keys { |k|
+              if r2.attribute_names.include?(k) && !(k == @r1_attr.to_sym && should_have_one_join_attribute?)
+                "#{r1.name}.#{k}".to_sym
+              else
+                k
+              end
+            },
+          **r2.attributes_hash.transform_keys { |k|
+              if k == @r2_attr.to_sym && should_have_one_join_attribute?
+                nil
+              elsif r1.attribute_names.include?(k)
+                "#{r2.name}.#{k}".to_sym
+              else
+                k
+              end
+            }
+        }
+        new_rel_attributes.delete(nil) if should_have_one_join_attribute?
+        ::Relation.new(**new_rel_attributes)
+      end
+
+      def should_have_one_join_attribute?
+        @should_have_one_join_attribute ||= @operator == '๐'
       end
 
       def rubified_operator
         case @operator
-        when '='  then '=='
-        when '<>' then '!='
+        when '=', '๐' then '=='
+        when '<>'     then '!='
         else @operator
         end
       end

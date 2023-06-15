@@ -27,10 +27,11 @@ class Relation
   def to_s
     col_widths = map_attributes { |name, _| [name, [name.to_s.size, *@rows.map { |r| r.public_send(name).to_s.size }].max] }.to_h
     [
+      *("#{name}:\n" if name),
       map_attributes { |name, _| name.to_s.ljust(col_widths[name]) }.join(' | '),
       "#{'-' * (col_widths.values.reduce(:+) + (col_widths.values.size - 1) * 3)}",
       *@rows.map { |row| map_attributes { |name, _| row.public_send(name).to_s.ljust(col_widths[name]) }.join(' | ') },
-      "#{@rows.size} record(s)"
+      "(#{@rows.size} record(s))"
     ].join("\n")
   end
 

@@ -5,10 +5,7 @@ module Grammar
     class Difference < ::Grammar::Operator
       def apply(r1, r2)
         unless r1.attributes.map(&:type) == r2.attributes.map(&:type)
-          raise ArgumentError,
-                "Cannot apply #{self.to_s}: relations' attribute types don't match\n"\
-                "Relation 1: #{r1.attributes.map(&:type)}\n"\
-                "Relation 2: #{r2.attributes.map(&:type)}"
+          raise ::Errors::SetOperatorTypeError.new(to_s, r1, r2)
         end
         new_rel = ::Relation.new(**r1.attributes_hash)
         rows_to_insert = r1.rows.reject do |r1_row|

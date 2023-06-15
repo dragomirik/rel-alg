@@ -30,12 +30,10 @@ module Grammar
 
       def validate_attribute_names(r1, r2)
         unless r1.attribute_names.include?(@r1_attr.to_sym)
-          raise ArgumentError,
-                "Cannot apply #{to_s}: first relation's attributes do not include #{@r1_attr}"
+          raise ::Errors::OperatorError.new(to_s, "first relation's attributes do not include #{@r1_attr}")
         end
         unless r2.attribute_names.include?(@r2_attr.to_sym)
-          raise ArgumentError,
-                "Cannot apply #{to_s}: second relation's attributes do not include #{@r2_attr}"
+          raise ::Errors::OperatorError.new(to_s, "second relation's attributes do not include #{@r2_attr}")
         end
       end
     end

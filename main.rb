@@ -7,40 +7,52 @@ require 'sinatra'
 
 require './lib/relation.rb'
 require './lib/interpretor.rb'
+require './lib/data_container.rb'
 
 SCHEMA_PATH = './data/schema.yaml'.freeze
-RELATION_DATA_PATH = ->(name) { "./data/relations/#{name}.csv" }
+RELATION_DATA_PATH = ->(name) { "./data/#{name}.csv" }
 
 def load_data
-  ::YAML.load(::File.read(SCHEMA_PATH)).map { |name, attrs|
+  unless ::File.exist?(SCHEMA_PATH)
+    ::File.open(SCHEMA_PATH, 'w') { |f| f.write({}.to_yaml) }
+  end
+  data_hash = ::YAML.load(::File.read(SCHEMA_PATH)).map { |name, attrs|
     rel = ::Relation.new(**attrs)
     rel.name = name
-    rel.bulk_insert(::CSV.read(RELATION_DATA_PATH.call(name)))
+    data = ::CSV.read(RELATION_DATA_PATH.call(name))
+    attrs.each.with_index do |(name, type), i|
+      case type
+      when :numeric
+        data.each { |r| r[i] = (r[i].match?(/\d+\.\d+/) ? r[i].to_f : r[i].to_i) }
+      when :date
+        data.each { |r| r[i] = Date.parse(r[i]) }
+      end
+    end
+    rel.bulk_insert(data)
     [name, rel]
   }.to_h
-end
-
-def format_data(data)
-  data.map { |rel_name, rel| "#{rel_name}:\n\n#{rel}" }.join("\n\n\n")
+  ::DataContainer.new(data_hash)
 end
 
 get '/' do
+  output = nil
+  output = if params['program'].to_s.size > 0
+             program_lines = params['program'].lines.map(&:strip)
+             begin
+               ::Interpretor.new.run(program_lines, load_data.to_h).to_s(reverse: true)
+             rescue ::Errors::RelationalAlgebraError => e
+               e.message
+             end
+           end
   erb :index, locals: {
     program: params['program'].to_s,
-    input_data: format_data(load_data),
-    output_data: params['output'].to_s
+    input_data: load_data.to_s,
+    output_data: output.to_s
   }
 end
 
-post '/run' do
-  program_lines = params['program'].lines.map(&:strip)
-  resulting_data = ::Interpretor.new.run(program_lines, load_data)
-  output = format_data(resulting_data.to_h.to_a.reverse)
-  redirect to "/?program=#{::URI.escape(params['program'])}&output=#{::URI.escape(output)}"
-end
-
 get '/data' do
-  erb :'data/index', locals: { data: load_data }
+  erb :'data/index', locals: { data: load_data.to_h }
 end
 
 get '/data/new' do

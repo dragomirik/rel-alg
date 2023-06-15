@@ -18,4 +18,10 @@ class DataContainer
   def to_h
     @data
   end
+
+  def to_s(reverse: false)
+    relations = @data.values
+    relations.reverse! if reverse
+    relations.map(&:to_s).join("\n\n\n")
+  end
 end

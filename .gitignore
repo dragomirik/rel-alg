@@ -1,4 +1,4 @@
 .bundle
 vendor
-/data/*.yaml
-/data/relations/*.csv
+/data/*.yaml*
+/data/*.csv*

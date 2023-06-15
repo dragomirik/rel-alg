@@ -20,7 +20,7 @@ module Grammar
         case char
         when ' '
           appent_to_current_string(char) if @inside_quotes
-        when /[\w><!='\/,\.]/
+        when /[[[:alnum:]]_><!=๐'\/,\.]/
           appent_to_current_string(char)
           @inside_quotes = !@inside_quotes if char == "'"
         when '('
@@ -80,8 +80,8 @@ module Grammar
       klass = case @current_operator_params
               when /\//
                 ::Grammar::Operators::Division
-              when /[<>=!]/
-                if @expression[(current_index + 1)..-1].match?(/^ *\)* *\w/)
+              when /[<>=!๐]/
+                if @expression[(current_index + 1)..-1].match?(/^ *\)* *[[[:alnum:]]_]/)
                   ::Grammar::Operators::Join
                 else
                   ::Grammar::Operators::Limit

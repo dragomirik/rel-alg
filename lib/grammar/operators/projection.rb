@@ -12,8 +12,7 @@ module Grammar
         projection_attrs = @params.split(',')
         new_rel_attrs = r.attributes_hash.select { |name, _type| projection_attrs.include?(name.to_s) }.to_h
         if (missing_attrs = projection_attrs.reject { |a| new_rel_attrs.keys.include?(a.to_sym) }).any?
-          raise ArgumentError,
-                "Cannot apply #{self.to_s}: relation's attributes do not include #{missing_attrs.join(', ')}"
+          raise ::Errors::OperatorError.new(to_s, "relation's attributes do not include #{missing_attrs.join(', ')}")
         end
         new_rel = ::Relation.new(**new_rel_attrs)
         r.rows.each do |row|
