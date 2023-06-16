@@ -6,7 +6,7 @@
       <sup><a href="/">Clear</a></sup>
     </h3>
     <form action="/" method="get">
-      <textarea id="program" name="program" rows="15" cols="70"><%= program %></textarea><br/>
+      <textarea id="program" name="program" rows="20" cols="70"><%= program %></textarea><br/><br/>
       <input type="submit" value="Run">
     </form>
   </div>
@@ -15,10 +15,12 @@
       Input Data&nbsp;
       <sup><a href="/data">Edit</a></sup>
     </h3>
-    <pre><%= input_data %></pre>
+    <div class="relations-container">
+      <pre><%= input_data %></pre>
+    </div>
   </div>
 </div>
 <div class="output-container">
-  <h3>Output Data:</h3>
+  <h3>Output Data</h3>
   <pre><%= output_data %></pre>
 </div>

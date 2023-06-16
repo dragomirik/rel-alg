@@ -17,6 +17,10 @@ a:hover {
 .input-container .input-data {
   flex-grow: 1;
 }
+.input-container .input-data .relations-container {
+  max-height: 25rem;
+  overflow-y: scroll;
+}
 .relation-form {
   display: flex;
 }

@@ -2,14 +2,14 @@ Then('I should see the homepage') do
   expect(@driver.find_element(:tag_name, 'h2').text).to eq('Relational Algebra Interpretor')
   expect(@driver.find_element(:tag_name, 'textarea').attribute('value')).to eq('')
   expect(@driver.find_element(:class, 'input-data').text).to start_with('Input Data  Edit')
-  expect(@driver.find_element(:class, 'output-container').text).to eq('Output Data:')
+  expect(@driver.find_element(:class, 'output-container').text).to eq('Output Data')
 end
 
 Then("I should see the homepage with {string} program") do |program_text|
   expect(@driver.find_element(:tag_name, 'h2').text).to eq('Relational Algebra Interpretor')
   expect(@driver.find_element(:tag_name, 'textarea').attribute('value')).to include(program_text)
   expect(@driver.find_element(:class, 'input-data').text).to start_with('Input Data  Edit')
-  expect(@driver.find_element(:class, 'output-container').text).to start_with('Output Data:')
+  expect(@driver.find_element(:class, 'output-container').text).to start_with('Output Data')
 end
 
 Then('I should be on Input data page') do
