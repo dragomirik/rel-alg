@@ -1,0 +1,15 @@
+---
+:Students:
+  :id: :numeric
+  :name: :string
+  :date_of_admission: :date
+:Lecturers:
+  :id: :numeric
+  :name: :string
+:Courses:
+  :id: :numeric
+  :name: :string
+  :lecturer_id: :numeric
+:CourseEnrollments:
+  :student_id: :numeric
+  :course_id: :numeric

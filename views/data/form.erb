@@ -1,15 +1,21 @@
 <form action="<%= action %>" method="post" autocomplete="off">
-  <label for="name">Name:</label><br/>
-  <input type="text" name="name" id="name" value="<%= name %>"><br/>
-  <div class="errors"><%= errors[:name] if errors[:name] %></div><br/>
+  <div class="name-input">
+    <label for="name">Name:</label><br/>
+    <input type="text" name="name" id="name" value="<%= name %>"><br/>
+    <div class="errors"><%= errors[:name] if errors[:name] %></div><br/>
+  </div>
 
-  <label for="schema">Attribute names & types:</label><br/>
-  <textarea cols="50" rows="10" name="schema" id="schema"><%= schema %></textarea><br/>
-  <div class="errors"><%= errors[:schema] if errors[:schema] %></div><br/>
+  <div class="schema-input">
+    <label for="schema">Attribute names & types:</label><br/>
+    <textarea cols="50" rows="10" name="schema" id="schema"><%= schema %></textarea><br/>
+    <div class="errors"><%= errors[:schema] if errors[:schema] %></div><br/>
+  </div>
 
-  <label for="rows">Data:</label><br/>
-  <textarea cols="50" rows="15" name="rows" id="rows"><%= rows %></textarea><br/>
-  <div class="errors"><%= errors[:rows].join("<br/>") if errors[:rows] %></div><br/>
+  <div class="rows-input">
+    <label for="rows">Data:</label><br/>
+    <textarea cols="50" rows="15" name="rows" id="rows"><%= rows %></textarea><br/>
+    <div class="errors"><%= errors[:rows].join("<br/>") if errors[:rows] %></div><br/>
+  </div>
 
   <input type="submit" value="<%= btn_label %>">
 </form>

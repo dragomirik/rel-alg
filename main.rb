@@ -9,8 +9,9 @@ require './lib/relation.rb'
 require './lib/interpretor.rb'
 require './lib/data_container.rb'
 
-SCHEMA_PATH = './data/schema.yaml'.freeze
-RELATION_DATA_PATH = ->(name) { "./data/#{name}.csv" }
+DATA_DIRECTORY = ENV['DATA_DIRECTORY'] || './data'
+SCHEMA_PATH = "#{DATA_DIRECTORY}/schema.yaml".freeze
+RELATION_DATA_PATH = ->(name) { "#{DATA_DIRECTORY}/#{name}.csv" }
 
 def load_data
   unless ::File.exist?(SCHEMA_PATH)

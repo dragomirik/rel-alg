@@ -24,10 +24,10 @@ class Relation
     @rows.map(&:to_h)
   end
 
-  def to_s
+  def to_s(with_name: name)
     col_widths = map_attributes { |name, _| [name, [name.to_s.size, *@rows.map { |r| r.public_send(name).to_s.size }].max] }.to_h
     [
-      *("#{name}:\n" if name),
+      *("#{name}:\n" if with_name),
       map_attributes { |name, _| name.to_s.ljust(col_widths[name]) }.join(' | '),
       "#{'-' * (col_widths.values.reduce(:+) + (col_widths.values.size - 1) * 3)}",
       *@rows.map { |row| map_attributes { |name, _| row.public_send(name).to_s.ljust(col_widths[name]) }.join(' | ') },

@@ -1,14 +1,16 @@
 <h2><a href="/">Relational Algebra Interpretor</a> / Input Data</h2>
 
 <% data.each do |relation_name, relation| %>
-  <h3>
-    <%= relation_name %>&nbsp;
-    <sup><a href="data/<%= relation_name %>/edit">Edit</a></sup>&nbsp;
-    <sup><a href="data/<%= relation_name %>/delete">Drop</a></sup>
-  </h3>
-  <pre>
-<%= relation %>
-  </pre>
+  <div class="<%= relation_name.downcase %>-relation">
+    <h3>
+      <%= relation_name %>&nbsp;
+      <sup><a href="data/<%= relation_name %>/edit">Edit</a></sup>&nbsp;
+      <sup><a href="data/<%= relation_name %>/delete">Drop</a></sup>
+    </h3>
+    <pre>
+<%= relation.to_s(with_name: false) %>
+    </pre>
+  </div>
 <% end %>
 
 <h3><a href="data/new">+ Add new relation</a></h3>

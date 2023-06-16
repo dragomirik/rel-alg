@@ -2,3 +2,5 @@
 vendor
 /data/*.yaml*
 /data/*.csv*
+/logs
+/tmp
