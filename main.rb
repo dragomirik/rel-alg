@@ -20,16 +20,17 @@ def load_data
   data_hash = ::YAML.load(::File.read(SCHEMA_PATH)).map { |name, attrs|
     rel = ::Relation.new(**attrs)
     rel.name = name
-    data = ::CSV.read(RELATION_DATA_PATH.call(name))
+    raw_data = ::File.read(RELATION_DATA_PATH.call(name)).lines.map(&:strip).join("\n")
+    csv_data = ::CSV.parse(raw_data)
     attrs.each.with_index do |(name, type), i|
       case type
       when :numeric
-        data.each { |r| r[i] = (r[i].match?(/\d+\.\d+/) ? r[i].to_f : r[i].to_i) }
+        csv_data.each { |r| r[i] = (r[i].match?(/\d+\.\d+/) ? r[i].to_f : r[i].to_i) }
       when :date
-        data.each { |r| r[i] = Date.parse(r[i]) }
+        csv_data.each { |r| r[i] = Date.parse(r[i]) }
       end
     end
-    rel.bulk_insert(data)
+    rel.bulk_insert(csv_data)
     [name, rel]
   }.to_h
   ::DataContainer.new(data_hash)

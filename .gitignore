@@ -1,6 +1,6 @@
 .bundle
 vendor
-/data/*.yaml*
-/data/*.csv*
+/data/**/*.yaml*
+/data/**/*.csv*
 /logs
 /tmp
