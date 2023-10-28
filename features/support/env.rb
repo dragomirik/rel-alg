@@ -13,7 +13,11 @@ end
 
 Before do
   ::FileUtils.mkdir_p(ENV['DATA_DIRECTORY'])
-  @driver = Selenium::WebDriver.for :chrome
+
+  args = []
+  args << 'headless=new' unless ENV['HEADLESS'] == 'false'
+  options = ::Selenium::WebDriver::Chrome::Options.new args: args
+  @driver = ::Selenium::WebDriver.for :chrome, options: options
 end
 
 After do

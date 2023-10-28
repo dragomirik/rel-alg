@@ -3,7 +3,7 @@ When("I visit app's root URL") do
 end
 
 When("I visit app's root URL with the program param set to {string}") do |program|
-  @driver.get "http://127.0.0.1:4567?program=#{::URI.escape(program)}"
+  @driver.get "http://127.0.0.1:4567?program=#{::URI::Parser.new.escape(program)}"
 end
 
 When('I click on {word} link') do |link_text|

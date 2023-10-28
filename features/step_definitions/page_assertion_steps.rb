@@ -13,7 +13,7 @@ Then("I should see the homepage with {string} program") do |program_text|
 end
 
 Then('I should be on Input data page') do
-  expect(@driver.current_url).to end_with('/data')
+  with_retry { expect(@driver.current_url).to end_with('/data') }
   expect(@driver.find_element(:tag_name, 'h2').text).to eq(
     'Relational Algebra Interpretor / Input Data'
   )
@@ -30,7 +30,7 @@ Then('I should be on Add new relation page') do
 end
 
 Then('I should be on Add new relation page with the following fields pre-filled:') do |table|
-  expect(@driver.current_url).to end_with('/data/create')
+  with_retry { expect(@driver.current_url).to end_with('/data/create') }
   expect(@driver.find_element(:tag_name, 'h2').text).to eq(
     'Relational Algebra Interpretor / Input Data / New Relation'
   )
@@ -50,7 +50,7 @@ Then('I should be on Edit {word} relation page') do |relation_name|
 end
 
 Then('I should be on Edit {word} relation page with some of the fields changed') do |relation_name|
-  expect(@driver.current_url).to match(%r{data/\w+/update$})
+  with_retry { expect(@driver.current_url).to match(%r{data/\w+/update$}) }
   expect(@driver.find_element(:tag_name, 'h2').text).to eq(
     "Relational Algebra Interpretor / Input Data / Edit #{relation_name}"
   )
