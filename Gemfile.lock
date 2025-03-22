@@ -81,6 +81,7 @@ DEPENDENCIES
   pry
   puma
   rspec
+  rubyzip
   selenium-webdriver
   sinatra
 
