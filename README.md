@@ -30,7 +30,7 @@ The supported operators are:
 - Cartesian product `×` (aliased as `*`)
 - projection `R[a]`
 - selection `R[a=x]`
-- join `R1[a=b]R2`
+- join `R1[a=b]R2` (note: natural join operator `๐` is supported as well)
 - division `R1[a1÷a2]R2` (aliased as `R1[a1/a2]R2`)
 
 To write the result of an operation into a relation, use `⟶` (aliased as `->`).
