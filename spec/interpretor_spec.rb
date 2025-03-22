@@ -273,6 +273,26 @@ RSpec.describe ::Interpretor do
         ])
       end
 
+      it 'should perform a self-join correctly' do
+        lines = ['Users[name=name]Users -> Res']
+        res_data = subject.run(lines, data)
+        expect(res_data[:Res].to_a).to eq([
+          { 'id1': 1, 'name1': 'John', 'id2': 1, 'name2': 'John' },
+          { 'id1': 2, 'name1': 'Jane', 'id2': 2, 'name2': 'Jane' },
+          { 'id1': 3, 'name1': 'Peter', 'id2': 3, 'name2': 'Peter' }
+        ])
+      end
+
+      it 'should perform a natural self-join correctly' do
+        lines = ['Users[name๐name]Users -> Res']
+        res_data = subject.run(lines, data)
+        expect(res_data[:Res].to_a).to eq([
+          { 'id1': 1, 'name': 'John', 'id2': 1 },
+          { 'id1': 2, 'name': 'Jane', 'id2': 2 },
+          { 'id1': 3, 'name': 'Peter', 'id2': 3 }
+        ])
+      end
+
       context 'invalid expressions' do
         it 'should raise an exception if there is no such attribute in the first relation' do
           expect { subject.run(['Users[meow=id]Admins -> Res'], data) }.to raise_error(

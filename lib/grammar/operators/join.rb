@@ -45,20 +45,28 @@ module Grammar
       def resulting_relation(r1, r2)
         new_rel_attributes = {
           **r1.attributes_hash.transform_keys { |k|
+              full_key = k.to_s
               if r2.attribute_names.include?(k) && !(k == @r1_attr.to_sym && should_have_one_join_attribute?)
-                "#{r1.name}.#{k}".to_sym
-              else
-                k
+                if r1.name == r2.name
+                  full_key.concat('1')
+                else
+                  full_key.prepend("#{r1.name}.")
+                end
               end
+              full_key.to_sym
             },
           **r2.attributes_hash.transform_keys { |k|
-              if k == @r2_attr.to_sym && should_have_one_join_attribute?
-                nil
-              elsif r1.attribute_names.include?(k)
-                "#{r2.name}.#{k}".to_sym
-              else
-                k
+              next if k == @r2_attr.to_sym && should_have_one_join_attribute?
+
+              full_key = k.to_s
+              if r1.attribute_names.include?(k)
+                if r1.name == r2.name
+                  full_key.concat('2')
+                else
+                  full_key.prepend("#{r2.name}.")
+                end
               end
+              full_key.to_sym
             }
         }
         new_rel_attributes.delete(nil) if should_have_one_join_attribute?
