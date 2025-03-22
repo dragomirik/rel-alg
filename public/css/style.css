@@ -2,31 +2,49 @@ a:link {
   text-decoration: none;
   color: blue;
 }
+
 a:visited {
   color: blue;
 }
+
 a:hover {
   text-decoration: underline;
 }
+
 .input-container {
   display: flex;
 }
+
 .input-container .program-text {
   flex-grow: 1;
 }
+
 .input-container .input-data {
   flex-grow: 1;
 }
+
 .input-container .input-data .relations-container {
   max-height: 25rem;
   overflow-y: scroll;
 }
+
 .relation-form {
   display: flex;
 }
+
 .relation-form .notes {
   padding-left: 20px;
 }
+
 form .errors {
   color: red;
+}
+
+#input-data-page {
+  display: flex;
+  justify-content: space-between;
+}
+
+#input-data-page #export-import {
+  margin: 0 5rem;
 }

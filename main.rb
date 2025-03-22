@@ -4,6 +4,7 @@ require 'uri'
 require 'yaml'
 
 require 'sinatra'
+require 'zip'
 
 require './lib/relation.rb'
 require './lib/interpretor.rb'
@@ -100,6 +101,32 @@ end
 
 get '/data' do
   erb :'data/index', locals: { data: load_data.to_h }
+end
+
+
+get '/data/export' do
+  zip_file_path = ::File.join('tmp', 'rel_alg_db.zip')
+  ::FileUtils.rm(zip_file_path) if ::File.exists?(zip_file_path)
+  ::Zip::File.open(zip_file_path, create: true) do |zipfile|
+    [SCHEMA_PATH, *Dir[::File.join(DATA_DIRECTORY, '*.csv')]].each do |file_path|
+      next unless ::File.exists?(file_path)
+
+      filename = file_path.split('/').last
+      zipfile.add(filename, file_path)
+    end
+  end
+  send_file zip_file_path, disposition: :attachment
+end
+
+post '/data/import' do
+  if (tempfile = params.dig(:file, :tempfile))
+    ::FileUtils.rm(SCHEMA_PATH)
+    ::FileUtils.rm(Dir[::File.join(DATA_DIRECTORY, '*.csv')])
+    ::Zip::File.foreach(tempfile) do |entry|
+      entry.extract(::File.join(DATA_DIRECTORY, entry.name))
+    end
+  end
+  redirect to '/data'
 end
 
 get '/data/new' do

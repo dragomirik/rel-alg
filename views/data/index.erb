@@ -1,16 +1,31 @@
 <h2><a href="/">Relational Algebra Interpretor</a> / Input Data</h2>
 
-<% data.each do |relation_name, relation| %>
-  <div class="<%= relation_name.downcase %>-relation">
-    <h3>
-      <%= relation_name %>&nbsp;
-      <sup><a href="data/<%= relation_name %>/edit">Edit</a></sup>&nbsp;
-      <sup><a href="data/<%= relation_name %>/delete">Drop</a></sup>
-    </h3>
-    <pre>
-<%= relation.to_s(with_name: false) %>
-    </pre>
-  </div>
-<% end %>
+<div id="input-data-page">
+  <div id="relations-list">
+    <% data.each do |relation_name, relation| %>
+      <div class="<%= relation_name.downcase %>-relation">
+        <h3>
+          <%= relation_name %>&nbsp;
+          <sup><a href="data/<%= relation_name %>/edit">Edit</a></sup>&nbsp;
+          <sup><a href="data/<%= relation_name %>/delete">Drop</a></sup>
+        </h3>
+        <pre>
+    <%= relation.to_s(with_name: false) %>
+        </pre>
+      </div>
+    <% end %>
 
-<h3><a href="data/new">+ Add new relation</a></h3>
+    <h3><a href="data/new">+ Add new relation</a></h3>
+  </div>
+
+  <div id="export-import">
+    <h3>Export input data into a .zip file</h3>
+    <h4><a href="data/export">Download file</a></h4>
+
+    <h3>Import input data from a .zip file</h3>
+    <form action="data/import" method="post" enctype="multipart/form-data">
+      <input type="file" name="file" accept="application/zip">
+      <input type="submit" value="Upload file">
+    </form>
+  </div>
+</div>
