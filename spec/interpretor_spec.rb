@@ -175,6 +175,15 @@ RSpec.describe ::Interpretor do
           { start_date: ::Date.new(2023, 3, 22), name: 'Severa' }
         ])
       end
+
+      it 'should not produce relations with duplicates' do
+        lines = ['UsersUserRoles[role] -> Res']
+        res_data = subject.run(lines, data)
+        expect(res_data[:Res].to_a).to eq([
+          { role: 'manager' },
+          { role: 'user' }
+        ])
+      end
     end
 
     context 'limit' do

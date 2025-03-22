@@ -16,7 +16,8 @@ class Relation
   end
 
   def insert(*row)
-    @rows << @row_struct.new(*row)
+    row_to_insert = @row_struct.new(*row)
+    @rows << row_to_insert unless @rows.include?(row_to_insert)
     self
   end
 
