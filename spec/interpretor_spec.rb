@@ -184,6 +184,19 @@ RSpec.describe ::Interpretor do
           { role: 'user' }
         ])
       end
+
+      it 'should preserve the order of attributes passed to projection operator' do
+        lines = ['Projects[name, id] -> Res']
+        res_data = subject.run(lines, data)
+        expect(res_data[:Res].to_a).to eq([
+          { name: 'Netvisor', id: 1 },
+          { name: 'Severa', id: 2 }
+        ])
+        expect(res_data[:Res].to_a[0].to_a).to eq([
+          [:name, 'Netvisor'],
+          [:id, 1]
+        ])
+      end
     end
 
     context 'limit' do
