@@ -105,11 +105,12 @@ end
 
 
 get '/data/export' do
+  ::FileUtils.mkdir_p('tmp')
   zip_file_path = ::File.join('tmp', 'rel_alg_db.zip')
-  ::FileUtils.rm(zip_file_path) if ::File.exists?(zip_file_path)
+  ::FileUtils.rm(zip_file_path) if ::File.exist?(zip_file_path)
   ::Zip::File.open(zip_file_path, create: true) do |zipfile|
     [SCHEMA_PATH, *Dir[::File.join(DATA_DIRECTORY, '*.csv')]].each do |file_path|
-      next unless ::File.exists?(file_path)
+      next unless ::File.exist?(file_path)
 
       filename = file_path.split('/').last
       zipfile.add(filename, file_path)
