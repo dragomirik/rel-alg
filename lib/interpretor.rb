@@ -19,9 +19,11 @@ class Interpretor
   private
 
   def sanitize_program_lines(lines)
-    lines = lines.map do |line|
-      SANITIZED_CHARACTERS.reduce(line.sub(%r{//.*$}, '')) { |l, (c_in, c_out)| l.gsub(c_in, c_out) }
-    end
+    lines.map do |line|
+      line = line.sub(%r{//.*$}, '').strip # remove comments
+      next unless line.length > 0
+      SANITIZED_CHARACTERS.reduce(line) { |l, (c_in, c_out)| l.gsub(c_in, c_out) }
+    end.compact
   end
 
   def evaluate(reverse_polish_notation, data)

@@ -51,6 +51,26 @@ RSpec.describe ::Interpretor do
     }
   end
 
+  it 'should skip empty lines' do
+    lines = [
+      'Users & Admins -> R1',
+      '',
+      'R1[name] -> Res'
+    ]
+    res_data = subject.run(lines, data)
+    expect(res_data[:Res].to_a).to eq([{ name: 'John' }])
+  end
+
+  it 'should skip comments' do
+    lines = [
+      'Users & Admins -> R1 // step 1',
+      '// whole line is commented out',
+      'R1[name] -> Res // step 2'
+    ]
+    res_data = subject.run(lines, data)
+    expect(res_data[:Res].to_a).to eq([{ name: 'John' }])
+  end
+
   context 'set operations' do
     it 'should perform intersection correctly' do
       lines = ['Users & Admins -> Res']
