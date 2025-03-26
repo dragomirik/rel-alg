@@ -21,7 +21,7 @@ docker run --network=host -v $(pwd)/data:/rel-alg/data rel-alg
 
 The web interface will be available at http://127.0.0.1:4567
 
-## How to Use
+## Syntax
 
 The supported operators are:
 - set union `∪` (aliased as `|`)
@@ -34,6 +34,8 @@ The supported operators are:
 - division `R1[a1÷a2]R2` (aliased as `R1[a1/a2]R2`)
 
 To write the result of an operation into a relation, use `⟶` (aliased as `->`).
+
+Comments `//` are also supported.
 
 ## Development & Testing
 
