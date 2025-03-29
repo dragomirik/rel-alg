@@ -4,3 +4,4 @@ vendor
 /data/**/*.csv*
 /logs/*.log
 /tmp
+.idea
