@@ -18,6 +18,98 @@
     <div class="container">
         <%= yield %>
     </div>
+
+    <!-- Response Modal -->
+    <div class="modal fade" id="responseModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const responseModal = new bootstrap.Modal(document.getElementById('responseModal'));
+        const modalTitle = document.querySelector('#responseModal .modal-title');
+        const modalBody = document.querySelector('#responseModal .modal-body');
+
+        // Handle form submissions
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                fetch(this.action, {
+                    method: this.method,
+                    body: new FormData(this),
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Set modal content based on response
+                    if (data.success) {
+                        modalTitle.innerHTML = '<i class="fas fa-check-circle text-success me-2"></i>Success';
+                        modalBody.innerHTML = 'Operation completed successfully.';
+                        
+                        // If redirect is specified, set up automatic redirect after modal close
+                        if (data.redirect) {
+                            const redirectUrl = data.redirect;
+                            document.querySelector('#responseModal').addEventListener('hidden.bs.modal', function handler() {
+                                window.location.href = redirectUrl;
+                                this.removeEventListener('hidden.bs.modal', handler);
+                            });
+                        }
+                    } else {
+                        modalTitle.innerHTML = '<i class="fas fa-exclamation-circle text-danger me-2"></i>Error';
+                        if (data.errors) {
+                            const errorList = document.createElement('ul');
+                            errorList.className = 'list-unstyled mb-0';
+                            
+                            Object.entries(data.errors).forEach(([field, messages]) => {
+                                if (Array.isArray(messages)) {
+                                    // Handle array of error messages (e.g., row errors)
+                                    messages.forEach(message => {
+                                        const li = document.createElement('li');
+                                        li.className = 'text-danger mb-2';
+                                        li.innerHTML = `<i class="fas fa-times me-2"></i><strong>${field}:</strong> ${message}`;
+                                        errorList.appendChild(li);
+                                    });
+                                } else {
+                                    // Handle single error message
+                                    const li = document.createElement('li');
+                                    li.className = 'text-danger mb-2';
+                                    li.innerHTML = `<i class="fas fa-times me-2"></i><strong>${field}:</strong> ${messages}`;
+                                    errorList.appendChild(li);
+                                }
+                            });
+                            
+                            modalBody.innerHTML = '';
+                            modalBody.appendChild(errorList);
+                        } else {
+                            modalBody.innerHTML = '<div class="text-danger">An error occurred during the operation.</div>';
+                        }
+                    }
+                    
+                    responseModal.show();
+                })
+                .catch(error => {
+                    modalTitle.innerHTML = '<i class="fas fa-exclamation-circle text-danger me-2"></i>Error';
+                    modalBody.innerHTML = '<div class="text-danger">An unexpected error occurred.</div>';
+                    responseModal.show();
+                });
+            });
+        });
+    });
+    </script>
 </body>
 </html>
