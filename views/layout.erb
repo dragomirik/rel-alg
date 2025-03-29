@@ -47,13 +47,19 @@
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
-                fetch(this.action, {
+                const options = {
                     method: this.method,
-                    body: new FormData(this),
                     headers: {
                         'Accept': 'application/json'
                     }
-                })
+                };
+
+                // Only add body if form has inputs
+                if (this.querySelector('input[name], select[name], textarea[name]')) {
+                    options.body = new FormData(this);
+                }
+                
+                fetch(this.action, options)
                 .then(response => response.json())
                 .then(data => {
                     // Set modal content based on response
