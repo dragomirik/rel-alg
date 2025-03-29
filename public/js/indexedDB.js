@@ -132,6 +132,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+// Clean data by removing trailing spaces and empty lines
+function cleanData(text) {
+    return text
+        .split('\n')
+        .map(line => line.trimRight())  // Remove trailing spaces
+        .filter(line => line.length > 0) // Remove empty lines
+        .join('\n');
+}
+
 // Intercept form submissions
 document.addEventListener('submit', async (event) => {
     const form = event.target;
@@ -140,6 +149,15 @@ document.addEventListener('submit', async (event) => {
         
         try {
             const formData = new FormData(form);
+            
+            // Clean schema and rows data
+            if (formData.has('schema')) {
+                formData.set('schema', cleanData(formData.get('schema')));
+            }
+            if (formData.has('rows')) {
+                formData.set('rows', cleanData(formData.get('rows')));
+            }
+
             const response = await fetch(form.action, {
                 method: form.method,
                 body: formData
