@@ -42,6 +42,15 @@
         const modalTitle = document.querySelector('#responseModal .modal-title');
         const modalBody = document.querySelector('#responseModal .modal-body');
 
+        // Clean up textarea content
+        function cleanTextareaContent(content) {
+            return content
+                .split('\n')
+                .map(line => line.trimEnd()) // Remove trailing spaces
+                .filter(line => line.length > 0) // Remove empty lines
+                .join('\n');
+        }
+
         // Handle form submissions
         document.querySelectorAll('form').forEach(form => {
             form.addEventListener('submit', function(e) {
@@ -56,7 +65,17 @@
 
                 // Only add body if form has inputs
                 if (this.querySelector('input[name], select[name], textarea[name]')) {
-                    options.body = new FormData(this);
+                    const formData = new FormData(this);
+                    
+                    // Clean up textarea content
+                    const textareas = this.querySelectorAll('textarea');
+                    textareas.forEach(textarea => {
+                        if (textarea.value) {
+                            formData.set(textarea.name, cleanTextareaContent(textarea.value));
+                        }
+                    });
+                    
+                    options.body = formData;
                 }
                 
                 fetch(this.action, options)
@@ -112,6 +131,15 @@
                     modalTitle.innerHTML = '<i class="fas fa-exclamation-circle text-danger me-2"></i>Error';
                     modalBody.innerHTML = '<div class="text-danger">An unexpected error occurred.</div>';
                     responseModal.show();
+                });
+            });
+
+            // Add live cleanup for textareas
+            form.querySelectorAll('textarea').forEach(textarea => {
+                textarea.addEventListener('blur', function() {
+                    if (this.value) {
+                        this.value = cleanTextareaContent(this.value);
+                    }
                 });
             });
         });
