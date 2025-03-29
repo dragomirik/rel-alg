@@ -1,21 +1,37 @@
-<p>
-  Input attributes & data as CSV (one line per attribute, one line per data row).
-</p>
-<p>
-  Attribute format is <code>attribute_name,attribute_type</code>, where <code>attribute_type</code> can
-  be one of the following: <code>numeric</code>, <code>string</code>, <code>date</code>.
-</p>
-<p>
-  <b>Example.</b> For a relation <code>Users</code> with three attributes (<code>id</code>, <code>email</code>, and <code>name</code>)
-  one would enter the following into the <i>Attribute names & types</i> textarea:
-  <pre>
-id,numeric
+<div class="guide-content">
+    <p class="text-muted">
+        Input attributes & data in CSV format, with one line per attribute and one line per data row.
+    </p>
+
+    <div class="mb-4">
+        <h6 class="guide-subtitle">Attribute Format</h6>
+        <p class="mb-2">Each attribute should be defined as:</p>
+        <div class="code-block">
+            <code>attribute_name,attribute_type</code>
+        </div>
+        <p class="mt-2 mb-1">Available types:</p>
+        <ul class="type-list">
+            <li><code>numeric</code> - for numbers</li>
+            <li><code>string</code> - for text</li>
+            <li><code>date</code> - for dates</li>
+        </ul>
+    </div>
+
+    <div class="example-section">
+        <h6 class="guide-subtitle">Example</h6>
+        <p class="mb-2">For a <code>Users</code> relation with three attributes:</p>
+        
+        <div class="example-block mb-4">
+            <div class="example-label">Attributes:</div>
+            <pre class="example-code">id,numeric
 email,string
-name,string
-  </pre>
-  And the following into the <i>Data</i> textarea:
-  <pre>
-1,john@example.com,John Smith
-2,jane@example.com,Jane Doe
-  </pre>
-</p>
+name,string</pre>
+        </div>
+
+        <div class="example-block">
+            <div class="example-label">Data rows:</div>
+            <pre class="example-code">1,john@example.com,John Smith
+2,jane@example.com,Jane Doe</pre>
+        </div>
+    </div>
+</div>

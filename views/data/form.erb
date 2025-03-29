@@ -1,21 +1,48 @@
 <form action="<%= action %>" method="post" autocomplete="off">
-  <div class="name-input">
-    <label for="name">Name:</label><br/>
-    <input type="text" name="name" id="name" value="<%= name %>"><br/>
-    <div class="errors"><%= errors[:name] if errors[:name] %></div><br/>
-  </div>
+    <div class="mb-4">
+        <label for="name" class="form-label">Relation Name</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-table"></i></span>
+            <input type="text" class="form-control custom-input <%= 'is-invalid' if errors[:name] %>" 
+                   name="name" id="name" value="<%= name %>" placeholder="Enter relation name">
+        </div>
+        <% if errors[:name] %>
+            <div class="invalid-feedback d-block"><%= errors[:name] %></div>
+        <% end %>
+    </div>
 
-  <div class="schema-input">
-    <label for="schema">Attribute names & types:</label><br/>
-    <textarea cols="50" rows="10" name="schema" id="schema"><%= schema %></textarea><br/>
-    <div class="errors"><%= errors[:schema] if errors[:schema] %></div><br/>
-  </div>
+    <div class="mb-4">
+        <label for="schema" class="form-label">Attribute Names & Types</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-columns"></i></span>
+            <textarea class="form-control custom-textarea <%= 'is-invalid' if errors[:schema] %>" 
+                      name="schema" id="schema" rows="8" 
+                      placeholder="Enter attributes in CSV format:&#10;id,numeric&#10;name,string&#10;email,string"><%= schema %></textarea>
+        </div>
+        <% if errors[:schema] %>
+            <div class="invalid-feedback d-block"><%= errors[:schema] %></div>
+        <% end %>
+    </div>
 
-  <div class="rows-input">
-    <label for="rows">Data:</label><br/>
-    <textarea cols="50" rows="15" name="rows" id="rows"><%= rows %></textarea><br/>
-    <div class="errors"><%= errors[:rows].join("<br/>") if errors[:rows] %></div><br/>
-  </div>
+    <div class="mb-4">
+        <label for="rows" class="form-label">Data Rows</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-database"></i></span>
+            <textarea class="form-control custom-textarea <%= 'is-invalid' if errors[:rows] %>" 
+                      name="rows" id="rows" rows="12"
+                      placeholder="Enter data rows in CSV format:&#10;1,John Doe,john@example.com&#10;2,Jane Doe,jane@example.com"><%= rows %></textarea>
+        </div>
+        <% if errors[:rows] %>
+            <div class="invalid-feedback d-block"><%= errors[:rows].join("<br/>") %></div>
+        <% end %>
+    </div>
 
-  <input type="submit" value="<%= btn_label %>">
+    <div class="d-flex justify-content-between align-items-center">
+        <button type="submit" class="btn btn-purple">
+            <i class="fas fa-save me-2"></i><%= btn_label %>
+        </button>
+        <a href="/data" class="btn btn-outline-secondary">
+            <i class="fas fa-times me-2"></i>Cancel
+        </a>
+    </div>
 </form>

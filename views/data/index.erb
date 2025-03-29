@@ -1,31 +1,66 @@
-<h2><a href="/">Relational Algebra Interpretor</a> / Input Data</h2>
+<div class="page-header mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Relational Algebra Interpreter</a></li>
+            <li class="breadcrumb-item active">Input Data</li>
+        </ol>
+    </nav>
+</div>
 
-<div id="input-data-page">
-  <div id="relations-list">
-    <% data.each do |relation_name, relation| %>
-      <div class="<%= relation_name.downcase %>-relation">
-        <h3>
-          <%= relation_name %>&nbsp;
-          <sup><a href="data/<%= relation_name %>/edit">Edit</a></sup>&nbsp;
-          <sup><a href="data/<%= relation_name %>/delete">Drop</a></sup>
-        </h3>
-        <pre>
-    <%= relation.to_s(with_name: false) %>
-        </pre>
-      </div>
-    <% end %>
+<div class="row">
+    <div class="col-lg-8">
+        <div id="relations-list">
+            <% data.each do |relation_name, relation| %>
+                <div class="custom-card relation-card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><%= relation_name %></h5>
+                        <div class="btn-group">
+                            <a href="data/<%= relation_name %>/edit" class="btn btn-sm btn-outline-purple">Edit</a>
+                            <a href="data/<%= relation_name %>/delete" class="btn btn-sm btn-outline-danger ms-2">Drop</a>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="schema-preview">
+                            <pre class="custom-pre schema-content mb-0"><%= relation.to_s(with_name: false) %></pre>
+                        </div>
+                    </div>
+                </div>
+            <% end %>
 
-    <h3><a href="data/new">+ Add new relation</a></h3>
-  </div>
+            <a href="data/new" class="btn btn-purple mb-4">
+                <i class="fas fa-plus"></i> Add New Relation
+            </a>
+        </div>
+    </div>
 
-  <div id="export-import">
-    <h3>Export input data into a .zip file</h3>
-    <h4><a href="data/export">Download file</a></h4>
+    <div class="col-lg-4">
+        <div class="custom-card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Export Data</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">Download your input data as a ZIP file</p>
+                <a href="data/export" class="btn btn-outline-purple">
+                    <i class="fas fa-download"></i> Download ZIP
+                </a>
+            </div>
+        </div>
 
-    <h3>Import input data from a .zip file</h3>
-    <form action="data/import" method="post" enctype="multipart/form-data">
-      <input type="file" name="file" accept="application/zip">
-      <input type="submit" value="Upload file">
-    </form>
-  </div>
+        <div class="custom-card">
+            <div class="card-header">
+                <h5 class="mb-0">Import Data</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">Upload a ZIP file with your input data</p>
+                <form action="data/import" method="post" enctype="multipart/form-data">
+                    <div class="custom-file mb-3">
+                        <input type="file" name="file" accept="application/zip" class="form-control custom-file-input">
+                    </div>
+                    <button type="submit" class="btn btn-purple">
+                        <i class="fas fa-upload"></i> Upload File
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
