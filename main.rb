@@ -16,25 +16,39 @@ SCHEMA_PATH = "#{DATA_DIRECTORY}/schema.yaml".freeze
 RELATION_DATA_PATH = ->(name) { "#{DATA_DIRECTORY}/#{name}.csv" }
 
 def load_data
+  # Ensure data directory exists
+  ::FileUtils.mkdir_p(DATA_DIRECTORY) unless ::File.directory?(DATA_DIRECTORY)
+
+  # Create empty schema file if it doesn't exist
   unless ::File.exist?(SCHEMA_PATH)
     ::File.open(SCHEMA_PATH, 'w') { |f| f.write({}.to_yaml) }
   end
+
   data_hash = ::YAML.load(::File.read(SCHEMA_PATH)).map { |name, attrs|
     rel = ::Relation.new(**attrs)
     rel.name = name
-    raw_data = ::File.read(RELATION_DATA_PATH.call(name)).lines.map(&:strip).join("\n")
-    csv_data = ::CSV.parse(raw_data)
-    attrs.each.with_index do |(name, type), i|
-      case type
-      when :numeric
-        csv_data.each { |r| r[i] = (r[i].match?(/\d+\.\d+/) ? r[i].to_f : r[i].to_i) }
-      when :date
-        csv_data.each { |r| r[i] = Date.parse(r[i]) }
+
+    # Try to read data file if it exists
+    data_path = RELATION_DATA_PATH.call(name)
+    if ::File.exist?(data_path)
+      raw_data = ::File.read(data_path).lines.map(&:strip).join("\n")
+      unless raw_data.empty?
+        csv_data = ::CSV.parse(raw_data)
+        attrs.each.with_index do |(name, type), i|
+          case type
+          when :numeric
+            csv_data.each { |r| r[i] = (r[i].match?(/\d+\.\d+/) ? r[i].to_f : r[i].to_i) }
+          when :date
+            csv_data.each { |r| r[i] = Date.parse(r[i]) }
+          end
+        end
+        rel.bulk_insert(csv_data)
       end
     end
-    rel.bulk_insert(csv_data)
+
     [name, rel]
   }.to_h
+
   ::DataContainer.new(data_hash)
 end
 
@@ -122,10 +136,24 @@ end
 
 post '/data/import' do
   if (tempfile = params.dig(:file, :tempfile))
-    ::FileUtils.rm(SCHEMA_PATH)
+    # Clear existing files
+    ::FileUtils.rm(SCHEMA_PATH) if ::File.exist?(SCHEMA_PATH)
     ::FileUtils.rm(Dir[::File.join(DATA_DIRECTORY, '*.csv')])
+    
+    # Extract new files
     ::Zip::File.foreach(tempfile) do |entry|
       entry.extract(::File.join(DATA_DIRECTORY, entry.name))
+    end
+    
+    # Create empty CSV files for any missing relations
+    if ::File.exist?(SCHEMA_PATH)
+      schema = ::YAML.load(::File.read(SCHEMA_PATH))
+      schema.each_key do |relation_name|
+        csv_path = RELATION_DATA_PATH.call(relation_name)
+        unless ::File.exist?(csv_path)
+          ::FileUtils.touch(csv_path)
+        end
+      end
     end
   end
   redirect to '/data'
