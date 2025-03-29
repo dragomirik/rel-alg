@@ -1,4 +1,4 @@
-# Relational Algebra Interpretor
+# Relational Algebra Interpreter
 
 Developed for [National University of Kyiv Mohyla Academy](https://www.ukma.edu.ua/eng/)
 
@@ -17,6 +17,13 @@ Or, alternatively, if you want to run it within a docker container:
 ```
 docker build -t rel-alg .
 docker run --network=host -v $(pwd)/data:/rel-alg/data rel-alg
+```
+
+Or, alternatively:
+```
+docker build -t rel-alg .
+docker ps | grep 4568 | awk '{print $1}' | xargs -r docker stop
+docker run -p 4568:4567 -v "$(pwd)/data:/rel-alg/data" rel-alg
 ```
 
 The web interface will be available at http://127.0.0.1:4567
@@ -39,7 +46,7 @@ Comments `//` are also supported.
 
 ## Development & Testing
 
-To run the tests localy:
+To run the tests locally:
 
 ```
 bundle exec rspec -fd
