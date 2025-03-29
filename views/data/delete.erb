@@ -1,16 +1,55 @@
-<h2><a href="/">Relational Algebra Interpretor</a> / <a href="/data">Input Data</a> / Drop <%= name %></h2>
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-trash me-2"></i>Delete Relation
+        </h5>
+    </div>
+    <div class="card-body">
+        <h6 class="card-subtitle mb-3">
+            You are about to delete the relation <code><%= name %></code>
+        </h6>
+        
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <strong>Warning:</strong> This action cannot be undone. All data in this relation will be permanently deleted.
+        </div>
 
-<p>
-  Do you really want to permanently delete relation <code><%= name %></code>? This action cannot be undone.
-</p>
-<% unless data.rows.size == 0 %>
-  <p>
-    Current data in <code><%= name %></code> relation:
-    <pre>
-<%= data %>
-    </pre>
-  </p>
-<% end %>
-<form action="/data/<%= name %>/destroy" method="post">
-  <input type="submit" value="Permanently delete">
-</form>
+        <% unless data.rows.size == 0 %>
+            <div class="mt-4">
+                <h6 class="fw-bold mb-3">Current data in relation:</h6>
+                <div class="border rounded bg-dark p-3">
+                    <pre class="mb-0 text-light"><%= data %></pre>
+                </div>
+            </div>
+        <% end %>
+
+        <div class="mt-4 d-flex gap-2">
+            <form action="/data/<%= name %>/delete" method="post" class="d-inline">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash me-2"></i>Delete Relation
+                </button>
+            </form>
+            <a href="/data" class="btn btn-outline-secondary">
+                <i class="fas fa-times me-2"></i>Cancel
+            </a>
+        </div>
+    </div>
+</div>
+
+<nav aria-label="breadcrumb" class="mt-4">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="/" class="text-decoration-none">
+                <i class="fas fa-home me-1"></i>Home
+            </a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="/data" class="text-decoration-none">
+                <i class="fas fa-database me-1"></i>Relations
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+            <i class="fas fa-trash me-1"></i>Delete <%= name %>
+        </li>
+    </ol>
+</nav>
