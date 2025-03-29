@@ -2,6 +2,7 @@ require 'csv'
 require 'fileutils'
 require 'uri'
 require 'yaml'
+require 'json'
 
 require 'sinatra'
 require 'zip'
@@ -135,19 +136,53 @@ get '/data/new' do
 end
 
 post '/data/create' do
-  if (errors = validate_relation_params(params)).empty?
-    schema = ::YAML.load(::File.read(SCHEMA_PATH))
-    schema[params['name'].to_sym] = parse_schema_hash_from_csv(params['schema'])
-    ::File.open(SCHEMA_PATH, 'w') { |f| f.write(schema.to_yaml) }
+  errors = validate_relation_params(params)
+  if errors.empty?
+    schema = parse_schema_hash_from_csv(params['schema'])
+    relation = ::Relation.new(**schema)
+    csv_data = ::CSV.parse(params['rows'].strip)
+    schema.each.with_index do |(name, type), i|
+      case type
+      when :numeric
+        csv_data.each { |r| r[i] = (r[i].match?(/\d+\.\d+/) ? r[i].to_f : r[i].to_i) }
+      when :date
+        csv_data.each { |r| r[i] = Date.parse(r[i]) }
+      end
+    end
+    relation.bulk_insert(csv_data)
+
+    # Save to filesystem
+    schema_hash = ::YAML.load(::File.read(SCHEMA_PATH))
+    schema_hash[params['name'].to_sym] = schema
+    ::File.open(SCHEMA_PATH, 'w') { |f| f.write(schema_hash.to_yaml) }
     ::File.open(RELATION_DATA_PATH.call(params['name']), 'w') { |f| f.write(params['rows'].strip) }
-    redirect to '/data'
+
+    if request.accept?('application/json')
+      content_type :json
+      {
+        success: true,
+        relation: {
+          name: params['name'],
+          schema: schema,
+          data: params['rows'].strip
+        },
+        redirect: '/data'
+      }.to_json
+    else
+      redirect '/data'
+    end
   else
-    erb :'data/new', locals: {
-      name: params['name'],
-      schema: params['schema'],
-      rows: params['rows'],
-      errors: errors
-    }
+    if request.accept?('application/json')
+      content_type :json
+      { success: false, errors: errors }.to_json
+    else
+      erb :'data/new', locals: {
+        name: params['name'],
+        schema: params['schema'],
+        rows: params['rows'],
+        errors: errors
+      }
+    end
   end
 end
 
@@ -161,31 +196,104 @@ get '/data/:relation/edit' do
   }
 end
 
-post '/data/:relation/update' do
-  original_name = params['relation']
-  if (errors = validate_relation_params(params, original_name)).empty?
-    schema = ::YAML.load(::File.read(SCHEMA_PATH))
+post '/data/:name/update' do |name|
+  errors = validate_relation_params(params, name)
+  if errors.empty?
+    # Delete old files
+    schema_hash = ::YAML.load(::File.read(SCHEMA_PATH))
+    schema_hash.delete(name.to_sym)
+    ::File.delete(RELATION_DATA_PATH.call(name)) if ::File.exist?(RELATION_DATA_PATH.call(name))
 
-    if (new_name = params['name'].strip) && new_name != original_name
-      ::FileUtils.mv(RELATION_DATA_PATH.call(original_name), RELATION_DATA_PATH.call(new_name))
-      schema[new_name.to_sym] = schema.delete(original_name.to_sym)
+    # Create new relation
+    schema = parse_schema_hash_from_csv(params['schema'])
+    relation = ::Relation.new(**schema)
+    csv_data = ::CSV.parse(params['rows'].strip)
+    schema.each.with_index do |(name, type), i|
+      case type
+      when :numeric
+        csv_data.each { |r| r[i] = (r[i].match?(/\d+\.\d+/) ? r[i].to_f : r[i].to_i) }
+      when :date
+        csv_data.each { |r| r[i] = Date.parse(r[i]) }
+      end
     end
+    relation.bulk_insert(csv_data)
 
-    new_schema = ::CSV.parse(params['schema'].strip).to_h.transform_keys(&:to_sym).transform_values(&:to_sym)
-    schema[params['name'].strip.to_sym] = new_schema
-    ::File.open(SCHEMA_PATH, 'w') { |f| f.write(schema.to_yaml) }
+    # Save new files
+    schema_hash[params['name'].to_sym] = schema
+    ::File.open(SCHEMA_PATH, 'w') { |f| f.write(schema_hash.to_yaml) }
+    ::File.open(RELATION_DATA_PATH.call(params['name']), 'w') { |f| f.write(params['rows'].strip) }
 
-    ::File.open(RELATION_DATA_PATH.call(params['name'].strip), 'w') { |f| f.write(params['rows'].strip) }
-
-    redirect to '/data'
+    if request.accept?('application/json')
+      content_type :json
+      {
+        success: true,
+        relation: {
+          name: params['name'],
+          schema: schema,
+          data: params['rows'].strip
+        },
+        deletedRelation: name != params['name'] ? name : nil,
+        redirect: '/data'
+      }.to_json
+    else
+      redirect '/data'
+    end
   else
-    erb :'data/edit', locals: {
-      original_name: original_name,
-      name: params['name'],
-      schema: params['schema'],
-      rows: params['rows'],
-      errors: errors
-    }
+    if request.accept?('application/json')
+      content_type :json
+      { success: false, errors: errors }.to_json
+    else
+      erb :'data/edit', locals: {
+        original_name: name,
+        name: params['name'],
+        schema: params['schema'],
+        rows: params['rows'],
+        errors: errors
+      }
+    end
+  end
+end
+
+post '/data/:name/delete' do |name|
+  schema_hash = ::YAML.load(::File.read(SCHEMA_PATH))
+  schema_hash.delete(name.to_sym)
+  ::File.open(SCHEMA_PATH, 'w') { |f| f.write(schema_hash.to_yaml) }
+  ::File.delete(RELATION_DATA_PATH.call(name)) if ::File.exist?(RELATION_DATA_PATH.call(name))
+
+  if request.accept?('application/json')
+    content_type :json
+    {
+      success: true,
+      deletedRelation: name,
+      redirect: '/data'
+    }.to_json
+  else
+    redirect '/data'
+  end
+end
+
+post '/data/restore' do
+  content_type :json
+  begin
+    payload = JSON.parse(request.body.read)
+    relations = payload['relations']
+
+    # Clear existing data
+    schema_hash = ::YAML.load(::File.read(SCHEMA_PATH))
+    schema_hash.clear
+    ::File.open(SCHEMA_PATH, 'w') { |f| f.write(schema_hash.to_yaml) }
+    ::Dir.glob("#{DATA_DIRECTORY}/*.csv").each { |f| ::File.delete(f) }
+
+    # Restore relations from IndexedDB
+    relations.each do |relation|
+      schema_hash[relation['name'].to_sym] = relation['schema']
+      ::File.open(RELATION_DATA_PATH.call(relation['name']), 'w') { |f| f.write(relation['data']) }
+    end
+    ::File.open(SCHEMA_PATH, 'w') { |f| f.write(schema_hash.to_yaml) }
+
+    { success: true }.to_json
+  rescue => e
+    { success: false, error: e.message }.to_json
   end
 end
 
