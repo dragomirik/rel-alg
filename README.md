@@ -19,7 +19,7 @@ docker build -t rel-alg .
 docker run --network=host -v $(pwd)/data:/rel-alg/data rel-alg
 ```
 
-Or, alternatively:
+Or, alternatively, `sh start.sh`:
 ```
 docker build -t rel-alg .
 docker ps | grep 4568 | awk '{print $1}' | xargs -r docker stop
