@@ -6,12 +6,56 @@
                 <a href="/" class="btn btn-sm btn-outline-purple">Clear</a>
             </div>
             <div class="card-body">
-                <form action="/" method="get">
+                <form id="programForm" action="/" method="post">
                     <div class="mb-3">
                         <textarea id="program" name="program" class="form-control custom-textarea" rows="15"><%= program %></textarea>
                     </div>
-                    <button type="submit" class="btn btn-purple">Run Program</button>
+                    <button type="button" id="runProgram" class="btn btn-purple">Run Program</button>
+
+                    <script>
+                    document.getElementById('runProgram').addEventListener('click', function() {
+                        const formData = new FormData();
+                        formData.append('program', document.getElementById('program').value);
+                        
+                        fetch('/', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            const responseModal = new bootstrap.Modal(document.getElementById('responseModal'));
+                            const modalTitle = document.querySelector('#responseModal .modal-title');
+                            const modalBody = document.querySelector('#responseModal .modal-body');
+                            const outputArea = document.querySelector('.custom-pre');
+
+                            if (data.success) {
+                                modalTitle.innerHTML = '<i class="fas fa-check-circle text-success me-2"></i>Success';
+                                modalBody.innerHTML = `<p class="mb-0">${data.result}</p>`;
+                                outputArea.innerHTML = data.result;
+                            } else {
+                                modalTitle.innerHTML = '<i class="fas fa-exclamation-circle text-danger me-2"></i>Error';
+                                modalBody.innerHTML = `<p class="mb-0">${data.error}</p>`;
+                                outputArea.innerHTML = data.error;
+                            }
+                            responseModal.show();
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            const responseModal = new bootstrap.Modal(document.getElementById('responseModal'));
+                            const modalTitle = document.querySelector('#responseModal .modal-title');
+                            const modalBody = document.querySelector('#responseModal .modal-body');
+                            const outputArea = document.querySelector('.custom-pre');
+                            
+                            const errorMessage = 'An error occurred while processing your request';
+                            modalTitle.innerHTML = '<i class="fas fa-exclamation-circle text-danger me-2"></i>Error';
+                            modalBody.innerHTML = `<p class="mb-0">${errorMessage}</p>`;
+                            outputArea.innerHTML = errorMessage;
+                            responseModal.show();
+                        });
+                    });
+                    </script>
                 </form>
+
             </div>
         </div>
 
@@ -35,6 +79,20 @@
                 <div class="relations-container">
                     <pre class="custom-pre mb-0"><%= input_data %></pre>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add the response modal -->
+<div class="modal fade" id="responseModal" tabindex="-1" aria-labelledby="responseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="responseModalLabel"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
             </div>
         </div>
     </div>
