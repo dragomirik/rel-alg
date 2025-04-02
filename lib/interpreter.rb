@@ -2,7 +2,7 @@ require_relative 'grammar/parser.rb'
 require_relative 'data_container'
 require_relative 'errors'
 
-class Interpretor
+class Interpreter
   def run(lines, data)
     data = ::DataContainer.new(data)
     sanitize_program_lines(lines).each.with_index(1) do |line, i|

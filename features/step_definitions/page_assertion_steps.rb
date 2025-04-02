@@ -1,12 +1,12 @@
 Then('I should see the homepage') do
-  expect(@driver.find_element(:tag_name, 'h2').text).to eq('Relational Algebra Interpretor')
+  expect(@driver.find_element(:tag_name, 'h2').text).to eq('Relational Algebra Interpreter')
   expect(@driver.find_element(:tag_name, 'textarea').attribute('value')).to eq('')
   expect(@driver.find_element(:class, 'input-data').text).to start_with('Input Data  Edit')
   expect(@driver.find_element(:class, 'output-container').text).to eq('Output Data')
 end
 
 Then("I should see the homepage with {string} program") do |program_text|
-  expect(@driver.find_element(:tag_name, 'h2').text).to eq('Relational Algebra Interpretor')
+  expect(@driver.find_element(:tag_name, 'h2').text).to eq('Relational Algebra Interpreter')
   expect(@driver.find_element(:tag_name, 'textarea').attribute('value')).to include(program_text)
   expect(@driver.find_element(:class, 'input-data').text).to start_with('Input Data  Edit')
   expect(@driver.find_element(:class, 'output-container').text).to start_with('Output Data')
@@ -15,14 +15,14 @@ end
 Then('I should be on Input data page') do
   with_retry { expect(@driver.current_url).to end_with('/data') }
   expect(@driver.find_element(:tag_name, 'h2').text).to eq(
-    'Relational Algebra Interpretor / Input Data'
+    'Relational Algebra Interpreter / Input Data'
   )
 end
 
 Then('I should be on Add new relation page') do
   expect(@driver.current_url).to end_with('/data/new')
   expect(@driver.find_element(:tag_name, 'h2').text).to eq(
-    'Relational Algebra Interpretor / Input Data / New Relation'
+    'Relational Algebra Interpreter / Input Data / New Relation'
   )
   expect(find_input('name').attribute('value')).to eq('')
   expect(find_input('schema').attribute('value')).to eq('')
@@ -32,7 +32,7 @@ end
 Then('I should be on Add new relation page with the following fields pre-filled:') do |table|
   with_retry { expect(@driver.current_url).to end_with('/data/create') }
   expect(@driver.find_element(:tag_name, 'h2').text).to eq(
-    'Relational Algebra Interpretor / Input Data / New Relation'
+    'Relational Algebra Interpreter / Input Data / New Relation'
   )
   table.hashes.first.each do |field_name, value|
     expect(find_input(field_name).attribute('value')).to eq(value)
@@ -42,7 +42,7 @@ end
 Then('I should be on Edit {word} relation page') do |relation_name|
   expect(@driver.current_url).to match(%r{data/\w+/edit$})
   expect(@driver.find_element(:tag_name, 'h2').text).to eq(
-    "Relational Algebra Interpretor / Input Data / Edit #{relation_name}"
+    "Relational Algebra Interpreter / Input Data / Edit #{relation_name}"
   )
   expect(find_input('name').attribute('value')).to eq(relation_name)
   expect(find_input('schema').attribute('value')).to eq(relation_schema(relation_name).to_a.map(&:to_csv).join)
@@ -52,14 +52,14 @@ end
 Then('I should be on Edit {word} relation page with some of the fields changed') do |relation_name|
   with_retry { expect(@driver.current_url).to match(%r{data/\w+/update$}) }
   expect(@driver.find_element(:tag_name, 'h2').text).to eq(
-    "Relational Algebra Interpretor / Input Data / Edit #{relation_name}"
+    "Relational Algebra Interpreter / Input Data / Edit #{relation_name}"
   )
 end
 
 Then('I should be on Drop {word} relation page') do |relation_name|
   expect(@driver.current_url).to match(%r{data/\w+/delete$})
   expect(@driver.find_element(:tag_name, 'h2').text).to eq(
-    "Relational Algebra Interpretor / Input Data / Drop #{relation_name}"
+    "Relational Algebra Interpreter / Input Data / Drop #{relation_name}"
   )
   expect(@driver.find_element(:tag_name, 'body').text).to include(
     "Do you really want to permanently delete relation #{relation_name}?"

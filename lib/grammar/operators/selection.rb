@@ -2,7 +2,7 @@ require_relative '../operator.rb'
 
 module Grammar
   module Operators
-    class Limit < ::Grammar::Operator
+    class Selection < ::Grammar::Operator
       def initialize(params)
         @params = params
         @attribute, @operator, @second_operand = params.split(/([=!<>]+)/)
@@ -27,7 +27,7 @@ module Grammar
       end
 
       def to_s
-        "LIMIT(#{@params})"
+        "SELECTION(#{@params})"
       end
 
       private
