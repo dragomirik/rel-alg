@@ -378,8 +378,8 @@ RSpec.describe ::Interpretor do
   context 'invalid input' do
     it 'should raise an error if there is no such relation' do
       expect { subject.run(['Dogs[id] -> Res'], data) }.to raise_error(
-        Errors::UnknownRelationError,
-        "Unknown relation 'Dogs'. Known relations include: 'Users', 'Admins', 'UserRoles', 'UsersUserRoles', 'Projects'"
+        Errors::InterpretationError,
+        /Unknown relation 'Dogs'. Known relations include: 'Users', 'Admins', 'UserRoles', 'UsersUserRoles', 'Projects'/
       )
     end
   end

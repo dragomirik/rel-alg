@@ -10,7 +10,7 @@ class Interpretor
       rpn = ::Grammar::Parser.parse(expression)
       resulting_relation = evaluate(rpn, data)
       data[relation_name.strip.to_sym] = resulting_relation if relation_name
-    rescue ::Errors::OperatorError => e
+    rescue => e
       raise ::Errors::InterpretationError.new(e, line, i, data)
     end
     data
