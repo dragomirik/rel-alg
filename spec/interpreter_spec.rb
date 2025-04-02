@@ -1,8 +1,8 @@
 require 'date'
 
-require 'interpretor.rb'
+require 'interpreter.rb'
 
-RSpec.describe ::Interpretor do
+RSpec.describe ::Interpreter do
   let :users do
     ::Relation.new(id: :numeric, name: :string).bulk_insert([
       [1, 'John'],

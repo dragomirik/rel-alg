@@ -1,10 +1,10 @@
-# Relational Algebra Interpretor
+# Relational Algebra Interpreter
 
 Developed for [National University of Kyiv Mohyla Academy](https://www.ukma.edu.ua/eng/)
 
 ## How to Run
 
-To run the interpretor, clone the repository,
+To run the interpreter, clone the repository,
 `cd` into the repo directory, and run the following commands:
 
 ```
