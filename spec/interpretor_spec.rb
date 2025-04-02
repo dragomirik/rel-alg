@@ -335,6 +335,21 @@ RSpec.describe ::Interpretor do
         ])
       end
 
+      it 'should perform a natural self-join correctly when the 2nd relation has duplicates in the columns minus the joined column' do
+        user_id_to_pet_relation = ::Relation.new(id: :numeric, pet: :string).bulk_insert([
+          [1, 'dog'],
+          [2, 'cat'],
+          [3, 'dog']
+        ])
+        lines = ['Users[id ๐ id]UserPets -> Res']
+        res_data = subject.run(lines, data.merge(UserPets: user_id_to_pet_relation))
+        expect(res_data[:Res].to_a).to eq([
+          { id: 1, name: 'John', pet: 'dog' },
+          { id: 2, name: 'Jane', pet: 'cat' },
+          { id: 3, name: 'Peter', pet: 'dog' }
+        ])
+      end
+
       context 'invalid expressions' do
         it 'should raise an exception if there is no such attribute in the first relation' do
           expect { subject.run(['Users[meow=id]Admins -> Res'], data) }.to raise_error(

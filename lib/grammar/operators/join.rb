@@ -13,14 +13,12 @@ module Grammar
         validate_attribute_names(r1, r2)
         new_rel = resulting_relation(r1, r2)
         r1.rows.each do |r1_row|
-          relation2 = if should_have_one_join_attribute?
-                        Projection.new(r2.attribute_names.select { |n| n != @r2_attr.to_sym }.join(',')).apply(r2)
-                      else
-                        r2
-                      end
-          r2.rows.zip(relation2.rows).each do |original_r2_row, r2_row_to_join|
-            if eval("r1_row.public_send(@r1_attr) #{rubified_operator} original_r2_row.public_send(@r2_attr)")
-              new_rel.insert(*r1_row.to_a, *r2_row_to_join.to_a)
+          index_of_r2_attr = r2.attribute_names.index(@r2_attr.to_sym)
+          r2.rows.each do |r2_row|
+            if eval("r1_row.public_send(@r1_attr) #{rubified_operator} r2_row.public_send(@r2_attr)")
+              r2_row_arr = r2_row.to_a
+              r2_row_arr.delete_at(index_of_r2_attr) if should_have_one_join_attribute?
+              new_rel.insert(*r1_row.to_a, *r2_row_arr)
             end
           end
         end
