@@ -55,13 +55,13 @@ RSpec.describe ::Grammar::Parser do
     end
   end
 
-  context 'parsing limit' do
-    it 'should parse limit correctly' do
-      expect(subject.parse('Rel[id=second_id]').map(&:to_s)).to eq(%w[Rel LIMIT(id=second_id)])
+  context 'parsing selection' do
+    it 'should parse selection correctly' do
+      expect(subject.parse('Rel[id=second_id]').map(&:to_s)).to eq(%w[Rel SELECTION(id=second_id)])
     end
 
-    it 'should parse shortened limit correctly' do
-      expect(subject.parse("Rel[name='John']").map(&:to_s)).to eq(%w[Rel LIMIT(name='John')])
+    it 'should parse shortened selection correctly' do
+      expect(subject.parse("Rel[name='John']").map(&:to_s)).to eq(%w[Rel SELECTION(name='John')])
     end
   end
 
@@ -80,8 +80,8 @@ RSpec.describe ::Grammar::Parser do
   context 'parsing complex relational algebra expressions' do
     {
       '(Parent[id])[id=parent_id]Child' => %w[Parent PROJECTION(id) Child JOIN(id=parent_id)],
-      "(Rel1[name = 'Name'])[ index]" => %w[Rel1 LIMIT(name='Name') PROJECTION(index)],
-      "(Rel1[name = 'With Whitespaces'])[ index]" => ['Rel1', "LIMIT(name='With Whitespaces')", 'PROJECTION(index)'],
+      "(Rel1[name = 'Name'])[ index]" => %w[Rel1 SELECTION(name='Name') PROJECTION(index)],
+      "(Rel1[name = 'With Whitespaces'])[ index]" => ['Rel1', "SELECTION(name='With Whitespaces')", 'PROJECTION(index)'],
       "(R_1 [id1 = id2] R_2)[index]" => %w[R_1 R_2 JOIN(id1=id2) PROJECTION(index)]
     }.each do |expression, rpn|
       it "should correctly parse #{expression}" do

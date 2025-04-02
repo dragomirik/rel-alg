@@ -219,8 +219,8 @@ RSpec.describe ::Interpreter do
       end
     end
 
-    context 'limit' do
-      it 'should perform limit correctly' do
+    context 'selection' do
+      it 'should perform selection correctly' do
         lines = ['(Users * Admins)[Users.name=Admins.name] -> Res']
         res_data = subject.run(lines, data)
         expect(res_data[:Res].to_a).to eq([
@@ -228,8 +228,8 @@ RSpec.describe ::Interpreter do
         ])
       end
 
-      context 'simplified limit' do
-        it 'should peform simplified limit with GT operator correctly' do
+      context 'simplified selection' do
+        it 'should peform simplified selection with GT operator correctly' do
           lines = ['Users[id>1] -> Res']
           res_data = subject.run(lines, data)
           expect(res_data[:Res].to_a).to eq([
@@ -238,7 +238,7 @@ RSpec.describe ::Interpreter do
           ])
         end
 
-        it 'should perform simplified limit with EQ operator correctly' do
+        it 'should perform simplified selection with EQ operator correctly' do
           lines = ["Users[name='John'] -> Res"]
           res_data = subject.run(lines, data)
           expect(res_data[:Res].to_a).to eq([
@@ -248,28 +248,28 @@ RSpec.describe ::Interpreter do
       end
 
       context 'invalid expressions' do
-        it 'should not perform limit if there is no such attribute' do
+        it 'should not perform selection if there is no such attribute' do
           expect { subject.run(['Users[year_of_birth=1996] -> Res'], data) }.to raise_error(
-            Errors::InterpretationError, /Cannot apply LIMIT\(year_of_birth=1996\): relation's attributes do not include year_of_birth/
+            Errors::InterpretationError, /Cannot apply SELECTION\(year_of_birth=1996\): relation's attributes do not include year_of_birth/
           )
         end
 
-        it 'should not perform limit if the second attribute does not exist' do
+        it 'should not perform selection if the second attribute does not exist' do
           expect { subject.run(['Users[id=second_id] -> Res'], data) }.to raise_error(
-            Errors::InterpretationError, /Cannot apply LIMIT\(id=second_id\): relation's attributes do not include second_id/
+            Errors::InterpretationError, /Cannot apply SELECTION\(id=second_id\): relation's attributes do not include second_id/
           )
         end
 
-        context 'simplified limit with mismatching value type' do
+        context 'simplified selection with mismatching value type' do
           it 'should raise an exception if the attribute is a string and the value is a number' do
             expect { subject.run(['Users[name=1] -> Res'], data) }.to raise_error(
-              Errors::InterpretationError, /Cannot apply LIMIT\(name=1\): 1 is not a string/
+              Errors::InterpretationError, /Cannot apply SELECTION\(name=1\): 1 is not a string/
             )
           end
 
           it 'should raise an exception if the attribute is a number and the value is a string' do
             expect { subject.run(["Users[id='John'] -> Res"], data) }.to raise_error(
-              Errors::InterpretationError, /Cannot apply LIMIT\(id='John'\): 'John' cannot be parsed into a number/
+              Errors::InterpretationError, /Cannot apply SELECTION\(id='John'\): 'John' cannot be parsed into a number/
             )
           end
         end

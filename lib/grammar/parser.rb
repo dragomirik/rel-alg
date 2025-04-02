@@ -4,9 +4,9 @@ require_relative 'operators/difference.rb'
 require_relative 'operators/division.rb'
 require_relative 'operators/intersection.rb'
 require_relative 'operators/join.rb'
-require_relative 'operators/limit.rb'
 require_relative 'operators/product.rb'
 require_relative 'operators/projection.rb'
+require_relative 'operators/selection.rb'
 require_relative 'operators/union.rb'
 
 module Grammar
@@ -84,7 +84,7 @@ module Grammar
                 if @expression[(current_index + 1)..-1].match?(/^ *\)* *[[[:alnum:]]_]/)
                   ::Grammar::Operators::Join
                 else
-                  ::Grammar::Operators::Limit
+                  ::Grammar::Operators::Selection
                 end
               else
                 ::Grammar::Operators::Projection
