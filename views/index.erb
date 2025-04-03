@@ -3,7 +3,7 @@
         <div class="custom-card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Program Lines</h5>
-                <a href="/" class="btn btn-sm btn-outline-purple">Clear</a>
+                <a href="/" class="btn btn-sm btn-outline-purple" onclick="localStorage.removeItem('relAlgProgram'); return true;">Clear</a>
             </div>
             <div class="card-body">
                 <form id="programForm" action="/" method="post">
@@ -13,6 +13,19 @@
                     <button type="button" id="runProgram" class="btn btn-purple">Run Program</button>
 
                     <script>
+                    // Load saved program from local storage on page load
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const savedProgram = localStorage.getItem('relAlgProgram');
+                        if (savedProgram) {
+                            document.getElementById('program').value = savedProgram;
+                        }
+                    });
+
+                    // Save program to local storage on change
+                    document.getElementById('program').addEventListener('input', function() {
+                        localStorage.setItem('relAlgProgram', this.value);
+                    });
+
                     document.getElementById('runProgram').addEventListener('click', function() {
                         const formData = new FormData();
                         formData.append('program', document.getElementById('program').value);
