@@ -52,7 +52,7 @@
             </div>
             <div class="card-body">
                 <p class="text-muted mb-3">Upload a ZIP file with your input data</p>
-                <form action="data/import" method="post" enctype="multipart/form-data">
+                <form id="importForm" action="data/import" method="post" enctype="multipart/form-data">
                     <div class="custom-file mb-3">
                         <input type="file" name="file" accept="application/zip" class="form-control custom-file-input">
                     </div>
@@ -60,6 +60,28 @@
                         <i class="fas fa-upload"></i> Upload File
                     </button>
                 </form>
+
+                <script>
+                document.getElementById('importForm').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    fetch(this.action, {
+                        method: 'POST',
+                        body: new FormData(this),
+                        redirect: 'follow'
+                    })
+                    .then(response => {
+                        if (response.ok || response.status === 303) {
+                            window.location.href = response.status === 303 ? response.headers.get('Location') : '/data';
+                        } else {
+                            throw new Error('Import failed');
+                        }
+                    })
+                    .catch(error => {
+                        alert('Error importing data: ' + error.message);
+                    });
+                });
+                </script>
             </div>
         </div>
     </div>

@@ -151,13 +151,24 @@ end
 
 post '/data/import' do
   if (tempfile = params.dig(:file, :tempfile))
+    # Ensure data directory exists
+    ::FileUtils.mkdir_p(DATA_DIRECTORY) unless ::File.directory?(DATA_DIRECTORY)
+
+    # Create empty schema file if it doesn't exist
+    unless ::File.exist?(SCHEMA_PATH)
+      ::File.open(SCHEMA_PATH, 'w') { |f| f.write({}.to_yaml) }
+    end
+
     # Clear existing files
     ::FileUtils.rm(SCHEMA_PATH) if ::File.exist?(SCHEMA_PATH)
     ::FileUtils.rm(Dir[::File.join(DATA_DIRECTORY, '*.csv')])
     
     # Extract new files
     ::Zip::File.foreach(tempfile) do |entry|
-      entry.extract(::File.join(DATA_DIRECTORY, entry.name))
+      target_path = ::File.join(DATA_DIRECTORY, entry.name)
+      # Create parent directories if they don't exist
+      ::FileUtils.mkdir_p(::File.dirname(target_path))
+      entry.extract(target_path)
     end
     
     # Create empty CSV files for any missing relations
