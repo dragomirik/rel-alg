@@ -67,10 +67,6 @@ body {
     transition: transform 0.2s ease;
 }
 
-.relation-card:hover {
-    transform: translateY(-2px);
-}
-
 .schema-preview {
     position: relative;
     overflow-x: auto;
