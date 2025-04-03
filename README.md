@@ -19,11 +19,10 @@ docker build -t rel-alg .
 docker run --network=host -v $(pwd)/data:/rel-alg/data rel-alg
 ```
 
-Or, alternatively, `sh start.sh`:
+Or, alternatively:
 ```
-docker build -t rel-alg .
-docker ps | grep 4568 | awk '{print $1}' | xargs -r docker stop
-docker run -p 4568:4567 -v "$(pwd)/data:/rel-alg/data" rel-alg
+docker-compose down
+docker-compose up -d --build
 ```
 
 The web interface will be available at http://127.0.0.1:4567
