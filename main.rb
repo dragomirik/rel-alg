@@ -277,6 +277,13 @@ post '/data/:name/update' do |name|
   end
 end
 
+get '/data/:relation/delete' do
+  erb :'data/delete', locals: {
+    name: params['relation'],
+    data: load_data[params['relation'].to_sym]
+  }
+end
+
 post '/data/:name/delete' do |name|
   schema_hash = ::YAML.load(::File.read(SCHEMA_PATH))
   schema_hash.delete(name.to_sym)
@@ -292,37 +299,5 @@ post '/data/:name/delete' do |name|
     }.to_json
   else
     redirect '/data'
-  end
-end
-
-get '/data/:relation/delete' do
-  erb :'data/delete', locals: {
-    name: params['relation'],
-    data: load_data[params['relation'].to_sym]
-  }
-end
-
-post '/data/restore' do
-  content_type :json
-  begin
-    payload = JSON.parse(request.body.read)
-    relations = payload['relations']
-
-    # Clear existing data
-    schema_hash = ::YAML.load(::File.read(SCHEMA_PATH))
-    schema_hash.clear
-    ::File.open(SCHEMA_PATH, 'w') { |f| f.write(schema_hash.to_yaml) }
-    ::Dir.glob("#{DATA_DIRECTORY}/*.csv").each { |f| ::File.delete(f) }
-
-    # Restore relations from IndexedDB
-    relations.each do |relation|
-      schema_hash[relation['name'].to_sym] = relation['schema']
-      ::File.open(RELATION_DATA_PATH.call(relation['name']), 'w') { |f| f.write(relation['data']) }
-    end
-    ::File.open(SCHEMA_PATH, 'w') { |f| f.write(schema_hash.to_yaml) }
-
-    { success: true }.to_json
-  rescue => e
-    { success: false, error: e.message }.to_json
   end
 end
