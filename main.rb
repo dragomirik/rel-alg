@@ -191,12 +191,12 @@ end
 
 post '/data/create' do
   if (errors = validate_relation_params(params)).empty?
-    schema = parse_schema_hash_from_csv(params['schema'])
+    new_relation_schema = parse_schema_hash_from_csv(params['schema'])
 
     # Save to filesystem
-    schema_hash = ::YAML.load(::File.read(SCHEMA_PATH))
-    schema_hash[params['name'].to_sym] = schema
-    ::File.open(SCHEMA_PATH, 'w') { |f| f.write(schema_hash.to_yaml) }
+    persisted_schema = ::YAML.load(::File.read(SCHEMA_PATH))
+    persisted_schema[params['name'].to_sym] = new_relation_schema
+    ::File.open(SCHEMA_PATH, 'w') { |f| f.write(persisted_schema.to_yaml) }
     ::File.open(RELATION_DATA_PATH.call(params['name']), 'w') { |f| f.write(params['rows'].strip) }
 
     if request.accept?('application/json')
@@ -205,7 +205,7 @@ post '/data/create' do
         success: true,
         relation: {
           name: params['name'],
-          schema: schema,
+          schema: new_relation_schema,
           data: params['rows'].strip
         },
         redirect: '/data'
@@ -241,16 +241,16 @@ end
 post '/data/:name/update' do |name|
   if (errors = validate_relation_params(params, name)).empty?
     # Delete old files
-    schema_hash = ::YAML.load(::File.read(SCHEMA_PATH))
-    schema_hash.delete(name.to_sym)
+    persisted_schema = ::YAML.load(::File.read(SCHEMA_PATH))
+    persisted_schema.delete(name.to_sym)
     ::File.delete(RELATION_DATA_PATH.call(name)) if ::File.exist?(RELATION_DATA_PATH.call(name))
 
     # Create new relation
-    schema = parse_schema_hash_from_csv(params['schema'])
+    new_relation_schema = parse_schema_hash_from_csv(params['schema'])
 
     # Save new files
-    schema_hash[params['name'].to_sym] = schema
-    ::File.open(SCHEMA_PATH, 'w') { |f| f.write(schema_hash.to_yaml) }
+    persisted_schema[params['name'].to_sym] = new_relation_schema
+    ::File.open(SCHEMA_PATH, 'w') { |f| f.write(persisted_schema.to_yaml) }
     ::File.open(RELATION_DATA_PATH.call(params['name']), 'w') { |f| f.write(params['rows'].strip) }
 
     if request.accept?('application/json')
@@ -259,7 +259,7 @@ post '/data/:name/update' do |name|
         success: true,
         relation: {
           name: params['name'],
-          schema: schema,
+          schema: new_relation_schema,
           data: params['rows'].strip
         },
         deletedRelation: name != params['name'] ? name : nil,
