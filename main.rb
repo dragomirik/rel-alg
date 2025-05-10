@@ -190,8 +190,7 @@ get '/data/new' do
 end
 
 post '/data/create' do
-  errors = validate_relation_params(params)
-  if errors.empty?
+  if (errors = validate_relation_params(params)).empty?
     schema = parse_schema_hash_from_csv(params['schema'])
 
     # Save to filesystem
@@ -240,8 +239,7 @@ get '/data/:relation/edit' do
 end
 
 post '/data/:name/update' do |name|
-  errors = validate_relation_params(params, name)
-  if errors.empty?
+  if (errors = validate_relation_params(params, name)).empty?
     # Delete old files
     schema_hash = ::YAML.load(::File.read(SCHEMA_PATH))
     schema_hash.delete(name.to_sym)
