@@ -162,7 +162,7 @@ post '/data/import' do
     # Clear existing files
     ::FileUtils.rm(SCHEMA_PATH) if ::File.exist?(SCHEMA_PATH)
     ::FileUtils.rm(Dir[::File.join(DATA_DIRECTORY, '*.csv')])
-    
+
     # Extract new files
     ::Zip::File.foreach(tempfile) do |entry|
       target_path = ::File.join(DATA_DIRECTORY, entry.name)
@@ -170,7 +170,7 @@ post '/data/import' do
       ::FileUtils.mkdir_p(::File.dirname(target_path))
       entry.extract(target_path)
     end
-    
+
     # Create empty CSV files for any missing relations
     if ::File.exist?(SCHEMA_PATH)
       schema = ::YAML.load(::File.read(SCHEMA_PATH))
@@ -193,17 +193,6 @@ post '/data/create' do
   errors = validate_relation_params(params)
   if errors.empty?
     schema = parse_schema_hash_from_csv(params['schema'])
-    relation = ::Relation.new(**schema)
-    csv_data = ::CSV.parse(params['rows'].strip)
-    schema.each.with_index do |(name, type), i|
-      case type
-      when :numeric
-        csv_data.each { |r| r[i] = (r[i].match?(/\d+\.\d+/) ? r[i].to_f : r[i].to_i) }
-      when :date
-        csv_data.each { |r| r[i] = Date.parse(r[i]) }
-      end
-    end
-    relation.bulk_insert(csv_data)
 
     # Save to filesystem
     schema_hash = ::YAML.load(::File.read(SCHEMA_PATH))
@@ -260,17 +249,6 @@ post '/data/:name/update' do |name|
 
     # Create new relation
     schema = parse_schema_hash_from_csv(params['schema'])
-    relation = ::Relation.new(**schema)
-    csv_data = ::CSV.parse(params['rows'].strip)
-    schema.each.with_index do |(name, type), i|
-      case type
-      when :numeric
-        csv_data.each { |r| r[i] = (r[i].match?(/\d+\.\d+/) ? r[i].to_f : r[i].to_i) }
-      when :date
-        csv_data.each { |r| r[i] = Date.parse(r[i]) }
-      end
-    end
-    relation.bulk_insert(csv_data)
 
     # Save new files
     schema_hash[params['name'].to_sym] = schema
