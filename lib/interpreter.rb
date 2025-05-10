@@ -2,7 +2,7 @@ require_relative 'grammar/parser.rb'
 require_relative 'data_container'
 require_relative 'errors'
 
-class Interpretor
+class Interpreter
   def run(lines, data)
     data = ::DataContainer.new(data)
     sanitize_program_lines(lines).each.with_index(1) do |line, i|
@@ -10,7 +10,7 @@ class Interpretor
       rpn = ::Grammar::Parser.parse(expression)
       resulting_relation = evaluate(rpn, data)
       data[relation_name.strip.to_sym] = resulting_relation if relation_name
-    rescue ::Errors::OperatorError => e
+    rescue => e
       raise ::Errors::InterpretationError.new(e, line, i, data)
     end
     data

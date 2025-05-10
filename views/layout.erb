@@ -55,7 +55,7 @@
         document.querySelectorAll('form').forEach(form => {
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
-                
+
                 const options = {
                     method: this.method,
                     headers: {
@@ -66,7 +66,7 @@
                 // Only add body if form has inputs
                 if (this.querySelector('input[name], select[name], textarea[name]')) {
                     const formData = new FormData(this);
-                    
+
                     // Clean up textarea content
                     const textareas = this.querySelectorAll('textarea');
                     textareas.forEach(textarea => {
@@ -74,10 +74,10 @@
                             formData.set(textarea.name, cleanTextareaContent(textarea.value));
                         }
                     });
-                    
+
                     options.body = formData;
                 }
-                
+
                 fetch(this.action, options)
                 .then(response => response.json())
                 .then(data => {
@@ -85,7 +85,7 @@
                     if (data.success) {
                         modalTitle.innerHTML = '<i class="fas fa-check-circle text-success me-2"></i>Success';
                         modalBody.innerHTML = 'Operation completed successfully.';
-                        
+
                         // If redirect is specified, set up automatic redirect after modal close
                         if (data.redirect) {
                             const redirectUrl = data.redirect;
@@ -99,7 +99,7 @@
                         if (data.errors) {
                             const errorList = document.createElement('ul');
                             errorList.className = 'list-unstyled mb-0';
-                            
+
                             Object.entries(data.errors).forEach(([field, messages]) => {
                                 if (Array.isArray(messages)) {
                                     // Handle array of error messages (e.g., row errors)
@@ -117,14 +117,14 @@
                                     errorList.appendChild(li);
                                 }
                             });
-                            
+
                             modalBody.innerHTML = '';
                             modalBody.appendChild(errorList);
                         } else {
                             modalBody.innerHTML = '<div class="text-danger">An error occurred during the operation.</div>';
                         }
                     }
-                    
+
                     responseModal.show();
                 })
                 .catch(error => {

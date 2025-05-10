@@ -8,7 +8,7 @@ require 'sinatra'
 require 'zip'
 
 require './lib/relation.rb'
-require './lib/interpretor.rb'
+require './lib/interpreter.rb'
 require './lib/data_container.rb'
 
 DATA_DIRECTORY = ENV['DATA_DIRECTORY'] || './data'
@@ -102,7 +102,7 @@ get '/' do
   output = if params['program'].to_s.size > 0
              program_lines = params['program'].lines.map(&:strip)
              begin
-               ::Interpretor.new.run(program_lines, load_data.to_h).to_s(reverse: true)
+               ::Interpreter.new.run(program_lines, load_data.to_h).to_s(reverse: true)
              rescue ::Errors::RelationalAlgebraError => e
                e.message
              end

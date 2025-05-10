@@ -75,7 +75,7 @@ Feature: Relational algebra expressions interpretation
       | Students ∪ Lecturers                           | Cannot apply UNION: relations' attribute types don't match                                   |
       | Students ∩ Lecturers                           | Cannot apply INTERSECTION: relations' attribute types don't match                            |
       | Students[favorite_color]                       | Cannot apply PROJECTION(favorite_color): relation's attributes do not include favorite_color |
-      | Students[id='meow']                            | Cannot apply LIMIT(id='meow'): 'meow' cannot be parsed into a number                         |
-      | Students[date_of_admission>0]                  | Cannot apply LIMIT(date_of_admission>0): 0 cannot be parsed into a date                      |
+      | Students[id='meow']                            | Cannot apply SELECTION(id='meow'): 'meow' cannot be parsed into a number                     |
+      | Students[date_of_admission>0]                  | Cannot apply SELECTION(date_of_admission>0): 0 cannot be parsed into a date                  |
       | Students[id=student_id]Lecturers               | Cannot apply JOIN(id=student_id): second relation's attributes do not include student_id     |
       | Students[id÷id](CourseEnrollments[student_id]) | Cannot apply DIVISION(id/id): second relation's attributes do not include id                 |

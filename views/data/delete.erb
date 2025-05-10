@@ -1,3 +1,13 @@
+<div class="page-header mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/"><i class="fas fa-database"></i> RelAlg Interpreter</a></li>
+            <li class="breadcrumb-item"><a href="/data">Input Data</a></li>
+            <li class="breadcrumb-item active">Drop <%= name %></li>
+        </ol>
+    </nav>
+</div>
+
 <div class="card">
     <div class="card-header">
         <h5 class="mb-0">
@@ -8,7 +18,7 @@
         <h6 class="card-subtitle mb-3">
             You are about to delete the relation <code><%= name %></code>
         </h6>
-        
+
         <div class="alert alert-warning">
             <i class="fas fa-exclamation-circle me-2"></i>
             <strong>Warning:</strong> This action cannot be undone. All data in this relation will be permanently deleted.

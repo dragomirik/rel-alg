@@ -29,7 +29,7 @@
                     document.getElementById('runProgram').addEventListener('click', function() {
                         const formData = new FormData();
                         formData.append('program', document.getElementById('program').value);
-                        
+
                         fetch('/', {
                             method: 'POST',
                             body: formData
@@ -58,7 +58,7 @@
                             const modalTitle = document.querySelector('#responseModal .modal-title');
                             const modalBody = document.querySelector('#responseModal .modal-body');
                             const outputArea = document.querySelector('.custom-pre');
-                            
+
                             const errorMessage = 'An error occurred while processing your request';
                             modalTitle.innerHTML = '<i class="fas fa-exclamation-circle text-danger me-2"></i>Error';
                             modalBody.innerHTML = `<p class="mb-0">${errorMessage}</p>`;
