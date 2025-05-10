@@ -1,6 +1,6 @@
 # Relational Algebra Interpreter
 
-Developed for [National University of Kyiv Mohyla Academy](https://www.ukma.edu.ua/eng/)
+Developed for [National University of Kyiv-Mohyla Academy](https://www.ukma.edu.ua/eng/)
 
 ## How to Run
 
@@ -19,13 +19,17 @@ docker build -t rel-alg .
 docker run --network=host -v $(pwd)/data:/rel-alg/data rel-alg
 ```
 
+The web interface will be available at http://127.0.0.1:4567.
+
 Or, alternatively:
+
 ```
 docker-compose down
 docker-compose up -d --build
 ```
 
-The web interface will be available at http://127.0.0.1:4567
+In this case, the web interface will be available at http://127.0.0.1:4568.
+
 
 ## Syntax
 
