@@ -119,7 +119,7 @@ post '/' do
   if params['program'].to_s.size > 0
     program_lines = params['program'].lines.map(&:strip)
     begin
-      result = ::Interpretor.new.run(program_lines, load_data.to_h).to_s(reverse: true)
+      result = ::Interpreter.new.run(program_lines, load_data.to_h).to_s(reverse: true)
       { success: true, result: result }.to_json
     rescue ::Errors::RelationalAlgebraError => e
       { success: false, error: e.message }.to_json
