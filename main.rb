@@ -302,6 +302,13 @@ post '/data/:name/delete' do |name|
   end
 end
 
+get '/data/:relation/delete' do
+  erb :'data/delete', locals: {
+    name: params['relation'],
+    data: load_data[params['relation'].to_sym]
+  }
+end
+
 post '/data/restore' do
   content_type :json
   begin
@@ -325,19 +332,4 @@ post '/data/restore' do
   rescue => e
     { success: false, error: e.message }.to_json
   end
-end
-
-get '/data/:relation/delete' do
-  erb :'data/delete', locals: {
-    name: params['relation'],
-    data: load_data[params['relation'].to_sym]
-  }
-end
-
-post '/data/:relation/destroy' do
-  schema = ::YAML.load(::File.read(SCHEMA_PATH))
-  schema.delete(params[:relation].to_sym)
-  ::File.open(SCHEMA_PATH, 'w') { |f| f.write(schema.to_yaml) }
-  ::FileUtils.rm(RELATION_DATA_PATH.call(params[:relation]))
-  redirect to '/data'
 end
